@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shree Sagarmatha Secondary School & Sagarmatha EMS | Bhadrapur 2, Jhapa</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/print.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Top Announcement Bar (Public) -->
+  <div class="header-topbar no-print">
+    <div class="topbar-info">
+      <span>📍 <strong class="school-address-en">Bhadrapur 2, Sagarmatha, Jhapa</strong></span>
+      <span>📞 <span class="school-phone">023-520134, 9842601234</span></span>
+      <span>✉️ <span class="school-email">info@sagarmathaschool.edu.np</span></span>
+      <span>🏛️ Established: <strong>2034 B.S.</strong> (Centrally Located Community School)</span>
+    </div>
+    <div class="topbar-actions">
+      <span class="badge badge-warning">Session: 2081/82 B.S.</span>
+      
+      <!-- Logged-in User Pill -->
+      <div id="ems-user-indicator" style="display: none; align-items: center; gap: 0.6rem;">
+        <span id="ems-user-name" style="font-weight: 700; color: #f8fafc; font-size: 0.85rem;"></span>
+        <span id="ems-user-role-badge" class="badge badge-info">ROLE</span>
+        <button class="btn btn-secondary btn-sm" onclick="logoutUser()" style="padding: 0.2rem 0.6rem; font-size: 0.78rem;">Logout</button>
+      </div>
+
+      <button id="topbar-auth-btn" class="btn btn-primary btn-sm" onclick="switchView('dashboard')">
+        🔐 Sagarmatha EMS Portal
+      </button>
+    </div>
+  </div>
+
+  <!-- Public Navigation Bar -->
+  <nav class="navbar-public no-print">
+    <div class="nav-container">
+      <div class="brand-wrapper" onclick="switchView('public')">
+        <div class="school-emblem">स</div>
+        <div class="brand-text">
+          <div class="brand-nepali school-name-np">श्री सगरमाथा माध्यमिक विद्यालय</div>
+          <h1 class="school-name-en">Shree Sagarmatha Secondary School</h1>
+          <p>Bhadrapur 2, Jhapa • Classes: ECD to Class 12</p>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">Home</a></li>
+        <li><a href="#about">About School</a></li>
+        <li><a href="#academics">Academics (ECD-12)</a></li>
+        <li><a href="#facilities">Facilities</a></li>
+        <li><a href="#gallery">Photo Gallery</a></li>
+        <li><a href="#notices">Notice Board</a></li>
+        <li><a href="#inquiry">Admissions</a></li>
+        <li>
+          <button id="public-login-trigger-btn" class="btn btn-accent btn-sm" onclick="switchView('dashboard')">
+            🚀 Sagarmatha EMS Login
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- PUBLIC WEBSITE VIEW -->
+  <!-- ===================================================================== -->
+  <div id="public-website-view" class="main-content">
+    
+    <!-- Hero Banner -->
+    <section id="hero" class="hero-banner">
+      <div class="hero-container">
+        <div>
+          <div class="hero-tag">
+            <span>⭐ Centrally Located Model Community School (सामुदायिक विद्यालय)</span>
+          </div>
+          <h1 class="hero-title">
+            Nurturing Minds, Building Future Leaders since 2034 B.S.
+          </h1>
+          <p class="hero-subtitle">
+            Welcome to <strong>Shree Sagarmatha Secondary School</strong>, Bhadrapur-2, Jhapa. Providing inclusive, modern, and high-quality education from Early Childhood Development (ECD) up to Grade 12 (+2 Science, Management & Education).
+          </p>
+          <div class="hero-cta">
+            <a href="#inquiry" class="btn btn-accent">
+              📝 Apply for Online Admission
+            </a>
+            <button class="btn btn-primary" onclick="switchView('dashboard')">
+              💻 Sagarmatha EMS Portal
+            </button>
+            <a href="#academics" class="btn btn-secondary">
+              Explore Programs (ECD - 12)
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-stats-card">
+          <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1.25rem; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 0.5rem;">
+            School at a Glance
+          </h3>
+          <div class="hero-stats-grid">
+            <div class="stat-item">
+              <h3 id="stat-students-count">1,200+</h3>
+              <p>Active Students</p>
+            </div>
+            <div class="stat-item">
+              <h3 id="stat-staff-count">45+</h3>
+              <p>Dedicated Educators & Staff</p>
+            </div>
+            <div class="stat-item">
+              <h3 id="stat-classes-count">17</h3>
+              <p>Levels (ECD to 12)</p>
+            </div>
+            <div class="stat-item">
+              <h3>2034 B.S.</h3>
+              <p>Year of Establishment</p>
+            </div>
+          </div>
+          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.85rem; color: #e2e8f0;">
+            ✓ Free Midday Meal (दिवा खाजा) for ECD–Grade 5<br>
+            ✓ Fully Equipped Science & Computer ICT Labs<br>
+            ✓ Municipal & Merit Scholarships Available
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About & Messages Section -->
+    <section id="about" class="section-wrapper">
+      <div class="section-header">
+        <span class="section-badge">Welcome to Our Institution</span>
+        <h2 class="section-title">Centrally Located Hub for Lifelong Learning</h2>
+        <p class="section-subtitle">
+          Established in 2034 B.S. in the heart of Bhadrapur Ward No. 2, Shree Sagarmatha Secondary School is a premier government community school empowering thousands of pupils across Jhapa.
+        </p>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <div class="feature-icon">🏛️</div>
+          <h3 class="feature-title">Headmaster's Message</h3>
+          <p class="feature-desc">
+            "At Shree Sagarmatha Secondary School, our mission is to provide holistic, value-based, and digitally integrated community education. Every child from our locality receives equal opportunities to thrive and excel in academic, technical, and extracurricular arenas."
+          </p>
+          <div style="margin-top: 1rem; font-size: 0.85rem; font-weight: bold; color: #1e3a8a;">
+            — Ram Prasad Adhikari (Principal)
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🤝</div>
+          <h3 class="feature-title">School Management (SMC)</h3>
+          <p class="feature-desc">
+            "With active community participation, Bhadrapur Municipality backing, and our passionate faculty, we ensure transparent school governance, state-of-the-art classroom facilities, and robust student welfare programs including nutritious midday meals."
+          </p>
+          <div style="margin-top: 1rem; font-size: 0.85rem; font-weight: bold; color: #0f766e;">
+            — SMC Chairperson, Bhadrapur-2
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">Vision & Core Values</h3>
+          <p class="feature-desc">
+            To emerge as a model community secondary school in Koshi Province by fostering critical thinking, digital literacy, scientific inquiry, and cultural morality. We believe in an environment where no student is left behind.
+          </p>
+          <div style="margin-top: 1rem; font-size: 0.85rem; font-weight: bold; color: #d97706;">
+            — Knowledge, Discipline, Character
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Academic Programs (ECD to Class 12) -->
+    <section id="academics" style="background: #ffffff; padding: 4.5rem 1.5rem; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+      <div style="max-width: 1240px; margin: 0 auto;">
+        <div class="section-header">
+          <span class="section-badge">Comprehensive Curriculum</span>
+          <h2 class="section-title">Academic Wings: From ECD to Class 12</h2>
+          <p class="section-subtitle">
+            Fully aligned with Nepal Government Curriculum Development Centre (CDC) and National Examination Board (NEB) guidelines.
+          </p>
+        </div>
+
+        <div class="card-grid-4">
+          <div class="feature-card">
+            <span class="badge badge-info" style="margin-bottom: 0.5rem;">Foundation Level</span>
+            <h3 class="feature-title">ECD & Primary (Class 1-5)</h3>
+            <p class="feature-desc">
+              Play-based Early Childhood Development, joyful English and Nepali medium teaching, foundational numeracy, and government-supported hot nutritious Midday Meals (दिवा खाजा).
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <span class="badge badge-info" style="margin-bottom: 0.5rem;">Basic Education</span>
+            <h3 class="feature-title">Basic Level (Class 6-8)</h3>
+            <p class="feature-desc">
+              Integrated curriculum in Mathematics, Science & Technology, Social Studies, English, and Nepali, preparing students for the Class 8 District/Municipal BLE examination.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <span class="badge badge-warning" style="margin-bottom: 0.5rem;">SEE Secondary</span>
+            <h3 class="feature-title">Secondary Level (Class 9-10)</h3>
+            <p class="feature-desc">
+              Intensive preparation for Secondary Education Examination (SEE). Practical Science experiments, Optional Math, Economics, and Computer Science lab courses.
+            </p>
+          </div>
+
+          <div class="feature-card" style="border: 2px solid #1e3a8a;">
+            <span class="badge badge-success" style="margin-bottom: 0.5rem;">Higher Secondary (+2)</span>
+            <h3 class="feature-title">+2 Science & Management</h3>
+            <p class="feature-desc">
+              Grade 11 & 12 streams:
+              <br>• <strong>Science:</strong> Physics, Chemistry, Biology, Math
+              <br>• <strong>Management:</strong> Accounting, Economics, Business Studies
+              <br>• <strong>Education:</strong> Pedagogy & Social Sciences
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Facilities -->
+    <section id="facilities" class="section-wrapper">
+      <div class="section-header">
+        <span class="section-badge">Infrastructure & Student Life</span>
+        <h2 class="section-title">Modern Facilities for Modern Learners</h2>
+        <p class="section-subtitle">
+          Investing in rich learning environments to ensure holistic student development.
+        </p>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <div class="feature-icon">💻</div>
+          <h3 class="feature-title">ICT & Computer Lab</h3>
+          <p class="feature-desc">
+            Equipped with 30+ networked PCs, fiber internet, multimedia projectors, and practical coding & digital skills education from Class 4 upwards.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔬</div>
+          <h3 class="feature-title">Science Laboratories</h3>
+          <p class="feature-desc">
+            Separate Physics, Chemistry, and Biology workbenches with modern apparatus, reagents, and models for Class 9-12 practical demonstrations.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <h3 class="feature-title">Library & Resource Center</h3>
+          <p class="feature-desc">
+            A diverse collection of reference textbooks, national journals, literature in Nepali & English, and competitive exam preparation resources.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🍲</div>
+          <h3 class="feature-title">Midday Meal (दिवा खाजा)</h3>
+          <p class="feature-desc">
+            Fresh, organic, hygienically prepared nutritious daily lunches served to all primary school pupils sourced directly from local Bhadrapur farm cooperatives.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚽</div>
+          <h3 class="feature-title">Sports & Extracurriculars</h3>
+          <p class="feature-desc">
+            Spacious playing grounds for Volleyball, Football, Badminton, Table Tennis, along with active clubs for Junior Red Cross, Scout, and Literature.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💧</div>
+          <h3 class="feature-title">Clean Water & Sanitation</h3>
+          <p class="feature-desc">
+            Modern RO filtered clean drinking water stations, gender-separated sanitary restrooms, and CCTV monitored secure campus premises.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- School Photo Gallery -->
+    <section id="gallery" class="section-wrapper" style="border-top: 1px solid var(--border); background: #ffffff; padding: 4.5rem 1.5rem;">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-header">
+          <span class="section-badge">तस्बिर पुस्तिका • Photo Gallery</span>
+          <h2 class="section-title">Campus Life & Activities at Sagarmatha</h2>
+          <p class="section-subtitle">Glimpses of academic excellence, science & ICT labs, sports achievements, and vibrant cultural events.</p>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm gallery-filter-btn active" onclick="filterGallery('All', this)">All Photos</button>
+          <button class="btn btn-secondary btn-sm gallery-filter-btn" onclick="filterGallery('Campus', this)">🏫 Campus & Lawns</button>
+          <button class="btn btn-secondary btn-sm gallery-filter-btn" onclick="filterGallery('Academic', this)">🔬 Academics & Labs</button>
+          <button class="btn btn-secondary btn-sm gallery-filter-btn" onclick="filterGallery('Sports', this)">⚽ Sports & Athletics</button>
+          <button class="btn btn-secondary btn-sm gallery-filter-btn" onclick="filterGallery('Events', this)">🎉 Cultural & Festivals</button>
+        </div>
+
+        <div id="public-gallery-grid" class="gallery-grid">
+          <!-- Populated dynamically by public.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Public Notice Board -->
+    <section id="notices" style="background: #f1f5f9; padding: 4.5rem 1.5rem; border-top: 1px solid var(--border);">
+      <div style="max-width: 1100px; margin: 0 auto;">
+        <div class="section-header">
+          <span class="section-badge">Notice Board & Announcements</span>
+          <h2 class="section-title">Latest Official Updates & Routines</h2>
+          <p class="section-subtitle">Stay informed on examination schedules, academic notices, and municipal directives.</p>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="loadPublicNotices('All')">All Notices</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPublicNotices('Exam')">Examination</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPublicNotices('Admission')">Admissions</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadPublicNotices('General')">General News</button>
+        </div>
+
+        <div id="public-notices-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Online Admission Inquiry Form -->
+    <section id="inquiry" class="section-wrapper">
+      <div style="max-width: 800px; margin: 0 auto; background: white; border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; box-shadow: var(--shadow-md);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <span class="section-badge">Join Sagarmatha Family</span>
+          <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e3a8a;">Online Admission Inquiry (ECD - 12)</h2>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Submit your child's inquiry directly into our administrative system. Our counselor will contact you.
+          </p>
+        </div>
+
+        <form id="public-inquiry-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Applicant Student's Full Name *</label>
+              <input type="text" name="applicant_name" class="form-control" placeholder="e.g. Ramesh Karki" required>
+            </div>
+            <div class="form-group">
+              <label>Class Applying For *</label>
+              <select name="applying_class" class="form-control" required>
+                <option value="">-- Choose Class --</option>
+                <option value="ECD">ECD (Early Childhood)</option>
+                <option value="Class 1">Class 1</option>
+                <option value="Class 2">Class 2</option>
+                <option value="Class 3">Class 3</option>
+                <option value="Class 4">Class 4</option>
+                <option value="Class 5">Class 5</option>
+                <option value="Class 6">Class 6</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10 (SEE)</option>
+                <option value="Class 11 Science">Class 11 Science</option>
+                <option value="Class 11 Management">Class 11 Management</option>
+                <option value="Class 11 Education">Class 11 Education</option>
+                <option value="Class 12 Science">Class 12 Science</option>
+                <option value="Class 12 Management">Class 12 Management</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Guardian / Parent's Name *</label>
+              <input type="text" name="guardian_name" class="form-control" placeholder="Father or Mother's Name" required>
+            </div>
+            <div class="form-group">
+              <label>Contact Mobile Number *</label>
+              <input type="tel" name="phone" class="form-control" placeholder="98XXXXXXXX" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Email Address (Optional)</label>
+              <input type="email" name="email" class="form-control" placeholder="parent@gmail.com">
+            </div>
+            <div class="form-group">
+              <label>Residential Address (Municipality/Ward) *</label>
+              <input type="text" name="address" class="form-control" placeholder="e.g. Bhadrapur-2, Jhapa" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Previous School Attended & Grade</label>
+            <input type="text" name="previous_school" class="form-control" placeholder="Previous school name and last grade passed">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Any Additional Notes or Scholarship Request</label>
+            <textarea name="message" class="form-control" rows="3" placeholder="Tell us if you are applying for community scholarship, transport or hostel requirement..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+            📨 Submit Online Inquiry
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Public Footer -->
+    <footer style="background: #0f172a; color: #94a3b8; padding: 4rem 1.5rem 2rem; border-top: 1px solid #1e293b;" class="no-print">
+      <div style="max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 2.5rem; margin-bottom: 3rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="school-emblem" style="width: 36px; height: 36px; font-size: 1rem;">स</div>
+            <h3 style="color: white; font-size: 1.1rem; font-weight: bold;">Shree Sagarmatha Sec. School</h3>
+          </div>
+          <p style="font-size: 0.88rem; line-height: 1.6; margin-bottom: 1rem;">
+            A premier centrally located community school in Bhadrapur-2, Jhapa (Established 2034 BS). Empowering students from Early Childhood through Higher Secondary level.
+          </p>
+          <div style="font-size: 0.82rem; color: #cbd5e1;">
+            Affiliated to Curriculum Development Centre (CDC) & National Examination Board (NEB), Nepal.
+          </div>
+        </div>
+
+        <div>
+          <h4 style="color: white; font-size: 0.95rem; font-weight: bold; margin-bottom: 1rem;">Quick Navigation</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+            <li><a href="#about">About School</a></li>
+            <li><a href="#academics">Academics (ECD-12)</a></li>
+            <li><a href="#facilities">Facilities & Labs</a></li>
+            <li><a href="#notices">Notice Board</a></li>
+            <li><a href="#inquiry">Online Admission</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 style="color: white; font-size: 0.95rem; font-weight: bold; margin-bottom: 1rem;">Management Portal</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+            <li><a href="javascript:switchView('dashboard')">EMS Dashboard</a></li>
+            <li><a href="javascript:switchView('students')">Student SIS</a></li>
+            <li><a href="javascript:switchView('exam')">Grade Sheet Generator</a></li>
+            <li><a href="javascript:switchView('finance')">Fee & Receipts</a></li>
+            <li><a href="javascript:switchView('attendance')">Daily Attendance</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 style="color: white; font-size: 0.95rem; font-weight: bold; margin-bottom: 1rem;">School Contact</h4>
+          <p style="font-size: 0.88rem; line-height: 1.6;">
+            <strong>Address:</strong> Bhadrapur Municipality, Ward No. 2, Sagarmatha, Jhapa, Nepal<br>
+            <strong>Phone:</strong> 023-520134, 9842601234<br>
+            <strong>Email:</strong> info@sagarmathaschool.edu.np<br>
+            <strong>Office Hours:</strong> Sun - Fri: 9:30 AM – 4:30 PM
+          </p>
+        </div>
+      </div>
+
+      <div style="max-width: 1240px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid #1e293b; text-align: center; font-size: 0.82rem; color: #64748b;">
+        © 2081 (2026) Shree Sagarmatha Secondary School & Sagarmatha EMS. All rights reserved.
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- SAGARMATHA EMS (EDUCATION MANAGEMENT SYSTEM) PORTAL VIEW -->
+  <!-- ===================================================================== -->
+  <div id="ems-portal-view" class="ems-container no-print" style="display: none;">
+    
+    <!-- EMS Sidebar -->
+    <aside class="ems-sidebar">
+      <div>
+        <div class="ems-sidebar-brand" onclick="switchView('dashboard')" style="cursor: pointer;">
+          <div class="school-emblem" style="width: 40px; height: 40px; font-size: 1.1rem;">स</div>
+          <div>
+            <h2>Sagarmatha EMS</h2>
+            <div style="font-size: 0.72rem; color: #0f766e; font-weight: 600;">श्री सगरमाथा मा.वि.</div>
+          </div>
+        </div>
+
+        <!-- Sidebar User Card -->
+        <div id="sidebar-user-card" style="background: #1e293b; border-radius: 8px; padding: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155;">
+          <div>
+            <div id="sidebar-user-name" style="font-size: 0.82rem; font-weight: bold; color: white;">Principal</div>
+            <div style="margin-top: 0.2rem;">
+              <span id="sidebar-user-role-badge" class="badge badge-info" style="font-size: 0.68rem; padding: 0.15rem 0.45rem;">ADMIN</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.35rem;">
+            <button class="btn btn-sm" onclick="openModal('change-password-modal')" title="Change Password" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: #334155; color: #f8fafc; border: 1px solid #475569;">
+              🔑
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="logoutUser()" title="Log out" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+              🚪 Exit
+            </button>
+          </div>
+        </div>
+
+        <ul class="sidebar-menu">
+          <!-- Student Role Exclusive Tab -->
+          <li class="sidebar-item" data-view="studentportal" style="display: none;">
+            <span class="icon">🎓</span> My Student Portal
+          </li>
+
+          <!-- Staff / Admin Tabs -->
+          <li class="sidebar-item active" data-view="dashboard">
+            <span class="icon">📊</span> Dashboard Overview
+          </li>
+          <li class="sidebar-item" data-view="students">
+            <span class="icon">🎓</span> Student SIS & Cards
+          </li>
+          <li class="sidebar-item" data-view="exam">
+            <span class="icon">📝</span> Exams & Grade Sheets
+          </li>
+          <li class="sidebar-item" data-view="finance">
+            <span class="icon">💳</span> Finance & Fee Receipts
+          </li>
+          <li class="sidebar-item" data-view="attendance">
+            <span class="icon">📋</span> Daily Attendance
+          </li>
+          <li class="sidebar-item" data-view="staff">
+            <span class="icon">👥</span> Teachers & Staff
+          </li>
+          <li class="sidebar-item" data-view="notices">
+            <span class="icon">📢</span> Notices & Circulars
+          </li>
+          <li class="sidebar-item" data-view="inquiries">
+            <span class="icon">📥</span> Admission Inquiries
+          </li>
+          <li class="sidebar-item" onclick="openModal('change-password-modal')">
+            <span class="icon">🔑</span> Change Password
+          </li>
+        </ul>
+      </div>
+
+      <div style="padding-top: 1.5rem; border-top: 1px solid #1e293b;">
+        <button class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;" onclick="switchView('public')">
+          🌐 View Public Website
+        </button>
+        <div style="margin-top: 0.75rem; text-align: center; font-size: 0.72rem; color: #64748b;">
+          Session: 2081 B.S. | RBAC Protected
+        </div>
+      </div>
+    </aside>
+
+    <!-- EMS Main Workspace Area -->
+    <main class="ems-main-view">
+
+      <!-- ============================================================== -->
+      <!-- 0. DEDICATED STUDENT / PARENT PORTAL VIEW (For role: student) -->
+      <!-- ============================================================== -->
+      <div id="ems-studentportal-panel" class="ems-view-panel" style="display: none;">
+        <div id="sp-student-header" style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm);">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e3a8a;">
+                📄 My Official Nepal CDC Grade Sheet (लब्धाङ्क पत्र)
+              </h3>
+              <p style="font-size: 0.82rem; color: #64748b;">Nepal Letter Grading Directive 2078/2080 Certified Result</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <label style="font-size: 0.85rem; font-weight: bold;">Select Exam:</label>
+              <select id="sp-exam-select" class="form-control" style="width: 250px; font-size: 0.85rem;" onchange="loadStudentPortalGradeSheet()"></select>
+            </div>
+          </div>
+          <div id="sp-gradesheet-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+          <h3 style="font-size: 1.25rem; font-weight: bold; color: #0f766e; margin-bottom: 0.35rem;">
+            💳 My Fee Billing & Payment History
+          </h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">
+            Monthly tuition and examination fee receipts issued by Bhadrapur 2 School Accounts Department.
+          </p>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Invoice No</th>
+                  <th>Month & Year</th>
+                  <th>Total Payable</th>
+                  <th>Amount Paid</th>
+                  <th>Remaining Due</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sp-invoices-tbody">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 1. DASHBOARD PANEL -->
+      <!-- ============================================================== -->
+      <div id="ems-dashboard-panel" class="ems-view-panel">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Administrative Dashboard</h2>
+            <p>Shree Sagarmatha Secondary School • Bhadrapur 2, Jhapa</p>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary" onclick="openModal('add-student-modal')">
+              + New Student Admission
+            </button>
+            <button class="btn btn-accent" onclick="switchView('finance')">
+              💳 Collect Fee
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Active Students</h4>
+              <div class="val" id="dash-card-students">0</div>
+            </div>
+            <div class="icon-box" style="background: #e0e7ff; color: #1e3a8a;">🎓</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Teaching Staff</h4>
+              <div class="val" id="dash-card-staff">0</div>
+            </div>
+            <div class="icon-box" style="background: #ccfbf1; color: #0f766e;">👥</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Total Fees Collected</h4>
+              <div class="val text-success" id="dash-card-collected">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #dcfce7; color: #15803d;">💰</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Pending Fee Dues</h4>
+              <div class="val text-danger" id="dash-card-due">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #fee2e2; color: #b91c1c;">⏳</div>
+          </div>
+        </div>
+
+        <!-- Quick Access Banner for Grade Sheets -->
+        <div style="background: linear-gradient(135deg, #1e3a8a, #0f766e); color: white; border-radius: 12px; padding: 1.5rem 2rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.35rem;">
+              Nepal CDC Letter Grading & Official Grade Sheet Preparation
+            </h3>
+            <p style="font-size: 0.9rem; opacity: 0.9;">
+              Fully configured for National CDC 2078/2080 guidelines. Enter Theory & Practical marks, auto-compute GPAs, and print certified marksheets (लब्धाङ्क पत्र).
+            </p>
+          </div>
+          <button class="btn btn-accent" onclick="switchView('exam')">
+            Launch Grade Sheet Module ➔
+          </button>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.1rem; font-weight: bold; color: #0f172a;">Recent Fee Payment Transactions</h3>
+            <button class="btn btn-outline btn-sm" onclick="switchView('finance')">View All Bills</button>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Receipt No</th>
+                  <th>Student Name</th>
+                  <th>Class</th>
+                  <th>Amount Paid</th>
+                  <th>Payment Mode</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="dash-recent-payments-tbody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 2. STUDENTS (SIS) PANEL -->
+      <!-- ============================================================== -->
+      <div id="ems-students-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Student Information System (SIS)</h2>
+            <p>Manage student profiles, registrations, class allocations & identity cards</p>
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span id="students-count-badge" class="badge badge-neutral" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">0 Students</span>
+            <button class="btn btn-primary" onclick="openModal('add-student-modal')">
+              + Register New Student
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <div class="form-group" style="flex: 2;">
+            <label>Search Student</label>
+            <input type="text" id="student-search-input" class="form-control" placeholder="Search by name, roll no, reg no, or phone..." oninput="loadStudentsView()">
+          </div>
+          <div class="form-group">
+            <label>Filter by Class</label>
+            <select id="student-filter-class" class="form-control class-select-dropdown" onchange="loadStudentsView()">
+              <option value="">-- All Classes --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Section</label>
+            <select id="student-filter-section" class="form-control" onchange="loadStudentsView()">
+              <option value="">-- All Sections --</option>
+              <option value="1">Section A</option>
+              <option value="2">Section B</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Students Directory Table -->
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Reg No</th>
+                <th>Roll</th>
+                <th>Student Full Name</th>
+                <th>Class & Section</th>
+                <th>Gender</th>
+                <th>Guardian & Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-table-tbody">
+              <!-- Populated by students.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 3. EXAMS & GRADE SHEETS PANEL (NEPAL CDC 2078/2080) -->
+      <!-- ============================================================== -->
+      <div id="ems-exam-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Examination & Nepal CDC Grade Sheet Preparation</h2>
+            <p>Letter Grading Directive 2078/2080 (अक्षरांकन पद्धति) • Marks Ledger & Official Marksheets</p>
+          </div>
+          <div>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('create-exam-modal')">
+              + Create Exam Term
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-outline exam-tab-btn active" data-tab="marks" onclick="switchExamSubTab('marks')">
+            📊 Bulk Marks Entry
+          </button>
+          <button class="btn btn-outline exam-tab-btn" data-tab="gradesheet" onclick="switchExamSubTab('gradesheet')">
+            📄 Official Nepal CDC Grade Sheet (लब्धाङ्क पत्र)
+          </button>
+          <button class="btn btn-outline exam-tab-btn" data-tab="ledger" onclick="switchExamSubTab('ledger')">
+            📑 Class Tabulation Ledger (लेजर)
+          </button>
+          <button class="btn btn-outline exam-tab-btn" data-tab="subjects" onclick="switchExamSubTab('subjects')">
+            📚 Class Subjects Directory (विषय सूची)
+          </button>
+        </div>
+
+        <!-- 3A. Bulk Marks Entry Tab -->
+        <div id="exam-sub-marks" class="exam-sub-view">
+          <div class="filter-bar">
+            <div class="form-group">
+              <label>Examination Term</label>
+              <select id="exam-marks-exam-select" class="form-control exam-select-dropdown" onchange="loadSubjectMarksGrid()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Select Class</label>
+              <select id="exam-marks-class-select" class="form-control class-select-dropdown" onchange="onExamClassChanged()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label>Select Subject</label>
+              <select id="exam-marks-subject-select" class="form-control" onchange="loadSubjectMarksGrid()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+          </div>
+
+          <div id="marks-grid-subject-info" style="background: #e0f2fe; color: #0369a1; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.88rem; margin-bottom: 1rem;">
+            <!-- Subject metadata info -->
+          </div>
+
+          <div class="table-container" style="margin-bottom: 1.25rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">Roll</th>
+                  <th>Reg No</th>
+                  <th>Student Name</th>
+                  <th style="width: 130px;">Theory (TH)</th>
+                  <th style="width: 130px;">Practical (PR)</th>
+                  <th style="width: 100px;">Total</th>
+                  <th style="width: 100px;">CDC Grade</th>
+                  <th style="width: 120px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="marks-entry-tbody">
+                <!-- Populated by exam.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <button id="save-marks-btn" class="btn btn-primary" onclick="saveAllMarksGrid()">
+              💾 Save All Marks & Recalculate Grades
+            </button>
+          </div>
+        </div>
+
+        <!-- 3B. Official Nepal CDC Grade Sheet Tab -->
+        <div id="exam-sub-gradesheet" class="exam-sub-view" style="display: none;">
+          <div class="filter-bar no-print">
+            <div class="form-group">
+              <label>Examination Term</label>
+              <select id="gs-exam-select" class="form-control exam-select-dropdown" onchange="generateOfficialGradeSheet()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 200px;">
+              <label>Class</label>
+              <select id="gs-class-select" class="form-control" onchange="onGradeSheetClassChanged()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group" style="flex: 2;">
+              <label>Select Student</label>
+              <select id="gs-student-select" class="form-control" onchange="generateOfficialGradeSheet()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div style="align-self: flex-end;">
+              <button class="btn btn-primary" onclick="generateOfficialGradeSheet()">
+                🔄 Generate Marksheet
+              </button>
+            </div>
+          </div>
+
+          <div id="official-gradesheet-preview">
+            <!-- Rendered by exam.js -->
+          </div>
+        </div>
+
+        <!-- 3C. Class Tabulation Ledger Tab -->
+        <div id="exam-sub-ledger" class="exam-sub-view" style="display: none;">
+          <div class="filter-bar no-print">
+            <div class="form-group">
+              <label>Examination Term</label>
+              <select id="ledger-exam-select" class="form-control exam-select-dropdown" onchange="loadClassTabulationLedger()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Class</label>
+              <select id="ledger-class-select" class="form-control class-select-dropdown" onchange="loadClassTabulationLedger()">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+          </div>
+
+          <div id="tabulation-ledger-container">
+            <!-- Rendered by exam.js -->
+          </div>
+        </div>
+
+        <!-- 3D. Class Subjects Directory Tab -->
+        <div id="exam-sub-subjects" class="exam-sub-view" style="display: none;">
+          <div class="filter-bar no-print" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+              <div class="form-group" style="min-width: 260px;">
+                <label>Select Class for Subject Directory</label>
+                <select id="sub-dir-class-select" class="form-control" onchange="loadClassSubjectsDirectory()">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="loadClassSubjectsDirectory()" style="height: 38px;">
+                🔄 Refresh Subjects
+              </button>
+            </div>
+            <div>
+              <button class="btn btn-primary btn-sm" onclick="openAddSubjectForClass()" style="height: 38px;">
+                + Add Subject to Class
+              </button>
+            </div>
+          </div>
+
+          <div id="subject-directory-container" class="table-container" style="margin-top: 1rem;">
+            <!-- Rendered by exam.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 4. FINANCE & FEE MANAGEMENT PANEL -->
+      <!-- ============================================================== -->
+      <div id="ems-finance-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>School Finance & Fee Management</h2>
+            <p>Student billing, fee collection counter, printable receipts, and operational expenses</p>
+          </div>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary btn-sm" onclick="openModal('generate-invoices-modal')">
+              📄 Generate Class Bills
+            </button>
+            <button class="btn btn-accent btn-sm" onclick="openModal('add-expense-modal')">
+              + Record Expense
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial KPI Strip -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Total Collected</h4>
+              <div class="val text-success" id="fin-metric-collected">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #dcfce7; color: #15803d;">💰</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Total Unpaid Dues</h4>
+              <div class="val text-danger" id="fin-metric-due">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #fee2e2; color: #b91c1c;">⏳</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Total Expenses</h4>
+              <div class="val" id="fin-metric-expense">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #fef3c7; color: #b45309;">📉</div>
+          </div>
+          <div class="metric-card">
+            <div class="meta">
+              <h4>Net School Cashflow</h4>
+              <div class="val font-bold" id="fin-metric-net">NPR 0</div>
+            </div>
+            <div class="icon-box" style="background: #e0f2fe; color: #0369a1;">🏦</div>
+          </div>
+        </div>
+
+        <!-- Sub Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
+          <button class="btn btn-outline fin-tab-btn active" data-tab="invoices" onclick="switchFinanceSubTab('invoices')">
+            📑 Billing & Invoices
+          </button>
+          <button class="btn btn-outline fin-tab-btn" data-tab="collect" onclick="switchFinanceSubTab('collect')">
+            💳 Fee Collection Counter
+          </button>
+          <button class="btn btn-outline fin-tab-btn" data-tab="expenses" onclick="switchFinanceSubTab('expenses')">
+            💸 School Expenses Log
+          </button>
+          <button class="btn btn-outline fin-tab-btn" data-tab="structure" onclick="switchFinanceSubTab('structure')">
+            ⚙️ Fee Structure Setup
+          </button>
+        </div>
+
+        <!-- 4A. Invoices List -->
+        <div id="finance-sub-invoices" class="finance-sub-panel">
+          <div class="filter-bar">
+            <div class="form-group">
+              <label>Filter Class</label>
+              <select id="fin-filter-class" class="form-control class-select-dropdown" onchange="loadInvoicesList()">
+                <option value="">-- All Classes --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="fin-filter-status" class="form-control" onchange="loadInvoicesList()">
+                <option value="">-- All Statuses --</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Partially Paid">Partially Paid</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Invoice No</th>
+                  <th>Student</th>
+                  <th>Class</th>
+                  <th>Billing Month</th>
+                  <th>Payable</th>
+                  <th>Paid</th>
+                  <th>Balance Due</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="finance-invoices-tbody">
+                <!-- Populated by finance.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4B. Collect Fee Counter Window -->
+        <div id="finance-sub-collect" class="finance-sub-panel" style="display: none;">
+          <div style="max-width: 680px; margin: 0 auto; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 2rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.25rem; font-weight: bold; color: #1e3a8a; margin-bottom: 0.35rem;">
+              Cash & Fee Collection Window
+            </h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1.5rem;">
+              Receive tuition and terminal fees, generate automated receipt numbers, and print official bilingual receipts.
+            </p>
+
+            <form id="collect-fee-form">
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Step 1: Select Student's Class</label>
+                <select id="collect-fee-class-select" class="form-control class-select-dropdown" onchange="prepareFeeCollectionWindow()">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Step 2: Choose Outstanding Student Bill</label>
+                <select id="collect-fee-invoice-select" name="invoice_id" class="form-control" onchange="onInvoiceSelectedForPayment()" required>
+                  <option value="">-- Select Class First --</option>
+                </select>
+              </div>
+
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: #334155;">Outstanding Amount Due:</span>
+                <span id="collect-fee-due-display" style="font-size: 1.3rem; font-weight: 800; color: #dc2626;">NPR 0</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label>Amount Paid Now (NPR) *</label>
+                  <input type="number" step="1" min="1" id="collect-fee-amount" name="amount_paid" class="form-control font-bold" required>
+                </div>
+                <div class="form-group">
+                  <label>Discount / Scholarship (NPR)</label>
+                  <input type="number" step="1" min="0" name="discount" class="form-control" value="0">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label>Payment Mode *</label>
+                  <select name="payment_mode" class="form-control">
+                    <option value="Cash">Cash at Counter</option>
+                    <option value="Fonepay/eSewa">Fonepay / eSewa QR</option>
+                    <option value="Bank Deposit">Bank Deposit / Transfer</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Transaction / Reference ID</label>
+                  <input type="text" name="transaction_ref" class="form-control" placeholder="Optional for digital pay">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Received By / Cashier Name</label>
+                <input type="text" name="received_by" class="form-control" value="Manoj Shrestha (Accountant)">
+              </div>
+
+              <button type="submit" class="btn btn-success" style="width: 100%; padding: 0.8rem; font-size: 1rem;">
+                💳 Settle Fee & Generate Official Receipt
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 4C. Expenses Tracker -->
+        <div id="finance-sub-expenses" class="finance-sub-panel" style="display: none;">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Expense Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Paid To</th>
+                  <th>Approved By</th>
+                  <th>Mode</th>
+                </tr>
+              </thead>
+              <tbody id="finance-expenses-tbody">
+                <!-- Populated by finance.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4D. Fee Structures Setup -->
+        <div id="finance-sub-structure" class="finance-sub-panel" style="display: none;">
+          <div id="finance-structures-container">
+            <!-- Populated by finance.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 5. DAILY ATTENDANCE REGISTER -->
+      <!-- ============================================================== -->
+      <div id="ems-attendance-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Daily Student Attendance Register</h2>
+            <p>Track attendance (Present / Absent / Leave) for all classes</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveDailyAttendance()">
+            💾 Save Daily Attendance
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="form-group">
+            <label>Select Class</label>
+            <select id="att-class-select" class="form-control class-select-dropdown" onchange="loadAttendanceView()">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Attendance Date</label>
+            <input type="date" id="att-date-input" class="form-control" onchange="loadAttendanceView()">
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">Roll</th>
+                <th>Reg No</th>
+                <th>Student Name</th>
+                <th style="width: 280px;">Attendance Status</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody id="attendance-table-tbody">
+              <!-- Populated by reports.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 6. TEACHERS & STAFF -->
+      <!-- ============================================================== -->
+      <div id="ems-staff-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Faculty & Administrative Staff Directory</h2>
+            <p>Shree Sagarmatha Secondary School Staff Roster</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('add-staff-modal')">
+            + Add Staff Member
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Staff Name</th>
+                <th>Designation / Role</th>
+                <th>Department</th>
+                <th>Qualification</th>
+                <th>Phone</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="staff-table-tbody">
+              <!-- Populated by reports.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 7. NOTICES & CIRCULARS (EMS) -->
+      <!-- ============================================================== -->
+      <div id="ems-notices-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Public Notices & Academic Circulars</h2>
+            <p>Publish notices visible on the school portal and notice board</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('add-notice-modal')">
+            + Publish New Notice
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Notice Title & Content</th>
+                <th>Category</th>
+                <th>Pinned</th>
+                <th>Attachment</th>
+              </tr>
+            </thead>
+            <tbody id="ems-notices-tbody">
+              <!-- Populated by reports.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- 8. ADMISSION INQUIRIES (EMS) -->
+      <!-- ============================================================== -->
+      <div id="ems-inquiries-panel" class="ems-view-panel" style="display: none;">
+        <div class="view-header">
+          <div class="view-title">
+            <h2>Online Admission Inquiries</h2>
+            <p>Direct applications received from the public school website</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Applicant Name</th>
+                <th>Applying Class</th>
+                <th>Guardian & Contact</th>
+                <th>Address</th>
+                <th>Message / Notes</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="ems-inquiries-tbody">
+              <!-- Populated by reports.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL DIALOGS -->
+  <!-- ===================================================================== -->
+
+  <!-- Modal 0: SECURE RBAC LOGIN MODAL -->
+  <div id="login-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a, #0f766e); color: white;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="school-emblem" style="width: 38px; height: 38px; font-size: 1rem; border-color: white;">स</div>
+          <div>
+            <h3 style="color: white; font-size: 1.15rem; margin-bottom: 0.1rem;">Sagarmatha EMS Login</h3>
+            <p style="font-size: 0.75rem; color: #cbd5e1;">Protected Role-Based Access Control (RBAC)</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" style="color: white;" onclick="closeModal('login-modal')">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.75rem;">
+        <!-- Quick Demo Switcher -->
+        <div style="margin-bottom: 1.25rem;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 0.4rem;">
+            ⚡ Quick-Login as Demo Role:
+          </span>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoLogin('admin')">
+              👑 Principal (Admin)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoLogin('teacher')">
+              👨‍🏫 Exam Head (Teacher)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoLogin('accountant')">
+              💼 Bursar (Accountant)
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="fillDemoLogin('student')">
+              🎓 Student (Class 10)
+            </button>
+          </div>
+        </div>
+
+        <div id="login-error-msg" style="display: none; background: #fee2e2; color: #dc2626; padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; border: 1px solid #fecaca;">
+          Invalid username or password.
+        </div>
+
+        <form id="login-form">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Username *</label>
+            <input type="text" name="username" class="form-control font-bold" placeholder="e.g. admin or teacher" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label>Password *</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.95rem;">
+            🔐 Sign In to Sagarmatha EMS
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.25rem; font-size: 0.78rem; color: #64748b;">
+          Shree Sagarmatha Secondary School • Bhadrapur-2, Jhapa<br>
+          Authorized administrative & student portal access only.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 1: Add New Student -->
+  <div id="add-student-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>New Student Admission</h3>
+        <button class="modal-close-btn" onclick="closeModal('add-student-modal')">&times;</button>
+      </div>
+      <form id="add-student-form">
+        <div class="modal-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Registration Number (Unique) *</label>
+              <input type="text" name="reg_no" class="form-control" placeholder="SSS-2081-XXXX" required>
+            </div>
+            <div class="form-group">
+              <label>Class Roll Number *</label>
+              <input type="number" name="roll_no" min="1" class="form-control" value="1" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>First Name (English) *</label>
+              <input type="text" name="first_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name (English) *</label>
+              <input type="text" name="last_name" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Name in Devanagari (Nepali)</label>
+            <input type="text" name="name_np" class="form-control" placeholder="e.g. आयुष अधिकारी">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Admission Class *</label>
+              <select id="modal-student-class-id" name="class_id" class="form-control class-select-dropdown" required>
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Section *</label>
+              <select id="modal-student-section-id" name="section_id" class="form-control" required>
+                <option value="1">Section A</option>
+                <option value="2">Section B</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Gender *</label>
+              <select name="gender" class="form-control" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>DOB in Bikram Sambat (BS) *</label>
+              <input type="text" name="dob_bs" class="form-control" placeholder="2066-04-15" required>
+            </div>
+            <div class="form-group">
+              <label>DOB in A.D.</label>
+              <input type="date" name="dob_ad" class="form-control">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Guardian Name *</label>
+              <input type="text" name="guardian_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Relation</label>
+              <select name="guardian_relation" class="form-control">
+                <option value="Father">Father</option>
+                <option value="Mother">Mother</option>
+                <option value="Guardian">Local Guardian</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Guardian Phone *</label>
+              <input type="tel" name="guardian_phone" class="form-control" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Permanent Residential Address *</label>
+              <input type="text" name="address" class="form-control" placeholder="Bhadrapur-2, Jhapa" required>
+            </div>
+            <div class="form-group">
+              <label>Blood Group</label>
+              <select name="blood_group" class="form-control">
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-student-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save & Register Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Student Profile -->
+  <div id="student-profile-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Student Official Record</h3>
+        <button class="modal-close-btn" onclick="closeModal('student-profile-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="student-profile-modal-body">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('student-profile-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Student ID Card -->
+  <div id="student-id-card-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Student Identity Card</h3>
+        <button class="modal-close-btn" onclick="closeModal('student-id-card-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="student-id-card-content">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Card</button>
+        <button class="btn btn-secondary" onclick="closeModal('student-id-card-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Official Printable Fee Receipt -->
+  <div id="receipt-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 780px;">
+      <div class="modal-header">
+        <h3>Official Fee Receipt (रसिद / भौचर)</h3>
+        <button class="modal-close-btn" onclick="closeModal('receipt-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="receipt-modal-body">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Generate Monthly Invoices -->
+  <div id="generate-invoices-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Bulk Generate Class Invoices</h3>
+        <button class="modal-close-btn" onclick="closeModal('generate-invoices-modal')">&times;</button>
+      </div>
+      <form id="generate-invoices-form">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Select Target Class *</label>
+            <select name="class_id" class="form-control class-select-dropdown" required>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Billing Month *</label>
+              <select name="month" class="form-control">
+                <option value="Baisakh">Baisakh</option>
+                <option value="Jestha">Jestha</option>
+                <option value="Ashadh">Ashadh</option>
+                <option value="Shrawan">Shrawan</option>
+                <option value="Bhadra">Bhadra</option>
+                <option value="Ashwin">Ashwin</option>
+                <option value="Kartik">Kartik</option>
+                <option value="Mangsir">Mangsir</option>
+                <option value="Poush">Poush</option>
+                <option value="Magh">Magh</option>
+                <option value="Falgun">Falgun</option>
+                <option value="Chaitra">Chaitra</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Academic Year *</label>
+              <input type="text" name="year" class="form-control" value="2081" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('generate-invoices-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Generate Bills</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: Add Expense -->
+  <div id="add-expense-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3>Record School Operational Expense</h3>
+        <button class="modal-close-btn" onclick="closeModal('add-expense-modal')">&times;</button>
+      </div>
+      <form id="add-expense-form">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Expense Title / Purpose *</label>
+            <input type="text" name="title" class="form-control" placeholder="e.g. Science Lab Consumables" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Category *</label>
+              <select name="category" class="form-control">
+                <option value="Midday Meal / दिवा खाजा">Midday Meal / दिवा खाजा</option>
+                <option value="Science Lab Supplies">Science Lab Supplies</option>
+                <option value="Stationery">Stationery & Examination Paper</option>
+                <option value="Utilities">Utilities & High Speed Fiber</option>
+                <option value="Maintenance">Classroom Maintenance</option>
+                <option value="Sports & Events">Sports & Cultural Events</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount (NPR) *</label>
+              <input type="number" step="0.5" min="1" name="amount" class="form-control" required>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Paid To (Vendor/Person) *</label>
+              <input type="text" name="paid_to" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Payment Mode</label>
+              <select name="payment_mode" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Fonepay/eSewa">Fonepay / eSewa</option>
+                <option value="Bank Deposit">Bank Deposit</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Approved By</label>
+            <input type="text" name="approved_by" class="form-control" value="Principal">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-expense-modal')">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 7: Add Staff -->
+  <div id="add-staff-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Register Faculty / Staff Member</h3>
+        <button class="modal-close-btn" onclick="closeModal('add-staff-modal')">&times;</button>
+      </div>
+      <form id="add-staff-form">
+        <div class="modal-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Employee Code *</label>
+              <input type="text" name="emp_code" class="form-control" placeholder="EMP-011" required>
+            </div>
+            <div class="form-group">
+              <label>Full Name (English) *</label>
+              <input type="text" name="name_en" class="form-control" required>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Role / Designation *</label>
+              <input type="text" name="role" class="form-control" placeholder="e.g. Science Teacher" required>
+            </div>
+            <div class="form-group">
+              <label>Department *</label>
+              <select name="department" class="form-control">
+                <option value="Science">Science</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Languages">Languages (Eng/Nep)</option>
+                <option value="Social Studies">Social Studies</option>
+                <option value="Primary">Primary Education</option>
+                <option value="ICT">ICT / Computer</option>
+                <option value="Administration">Administration & Accounts</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label>Qualification *</label>
+              <input type="text" name="qualification" class="form-control" placeholder="e.g. M.Sc., B.Ed" required>
+            </div>
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" name="phone" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-staff-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Staff Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 8: Add Notice -->
+  <div id="add-notice-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Publish School Notice</h3>
+        <button class="modal-close-btn" onclick="closeModal('add-notice-modal')">&times;</button>
+      </div>
+      <form id="add-notice-form">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Notice Headline / Title *</label>
+            <input type="text" name="title" class="form-control" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Category *</label>
+              <select name="category" class="form-control">
+                <option value="Exam">Examination</option>
+                <option value="Academic">Academic</option>
+                <option value="Admission">Admission</option>
+                <option value="Holiday">Holiday</option>
+                <option value="General">General News</option>
+              </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem;">
+              <input type="checkbox" name="is_pinned" id="notice-pinned-check">
+              <label for="notice-pinned-check">Pin to top of notice board</label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Notice Body Text *</label>
+            <textarea name="content" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Attachment Filename (Optional)</label>
+            <input type="text" name="file_attachment" class="form-control" placeholder="Routine_Final_Exam.pdf">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-notice-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish Notice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 9: Create Exam Term -->
+  <div id="create-exam-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Add Examination Term</h3>
+        <button class="modal-close-btn" onclick="closeModal('create-exam-modal')">&times;</button>
+      </div>
+      <form id="create-exam-form" onsubmit="handleCreateExamSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Exam Name *</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Pre-SEE Model Exam 2081" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Term *</label>
+              <select name="term" class="form-control">
+                <option value="First Term">First Term</option>
+                <option value="Second Term">Second Term</option>
+                <option value="Pre-Board">Pre-Board / Pre-SEE</option>
+                <option value="Final">Annual / Final</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Academic Year *</label>
+              <input type="text" name="academic_year" class="form-control" value="2081" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('create-exam-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Exam</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 10: Add Curriculum Subject -->
+  <div id="add-subject-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3>Add Curriculum Subject (विषय थप्नुहोस्)</h3>
+        <button class="modal-close-btn" onclick="closeModal('add-subject-modal')">&times;</button>
+      </div>
+      <form id="add-subject-form" onsubmit="handleCreateSubjectSubmit(event)">
+        <div class="modal-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Target Class *</label>
+              <select id="new-subject-class-select" name="class_id" class="form-control" required>
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label>CDC Subject Code *</label>
+              <input type="text" name="code" class="form-control" placeholder="e.g. Opt.108" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Subject Name (English) *</label>
+              <input type="text" name="name_en" class="form-control" placeholder="e.g. Agriculture Science" required>
+            </div>
+            <div class="form-group">
+              <label>Subject Name (Nepali)</label>
+              <input type="text" name="name_np" class="form-control" placeholder="e.g. कृषि विज्ञान">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+              <label>Credit Hours *</label>
+              <input type="number" step="0.5" name="credit_hours" class="form-control" value="4.0" required>
+            </div>
+            <div class="form-group">
+              <label>Theory (Full / Pass) *</label>
+              <div style="display: flex; gap: 0.25rem;">
+                <input type="number" step="1" name="theory_full_marks" class="form-control" value="75" placeholder="Full" required>
+                <input type="number" step="1" name="theory_pass_marks" class="form-control" value="27" placeholder="Pass" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Practical (Full / Pass)</label>
+              <div style="display: flex; gap: 0.25rem;">
+                <input type="number" step="1" name="practical_full_marks" class="form-control" value="25" placeholder="Full">
+                <input type="number" step="1" name="practical_pass_marks" class="form-control" value="10" placeholder="Pass">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <input type="checkbox" id="subject-is-optional" name="is_optional" value="1">
+            <label for="subject-is-optional" style="margin-bottom: 0; cursor: pointer;">This is an Optional / Elective Subject (ऐच्छिक विषय)</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('add-subject-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 11: Change Password -->
+  <div id="change-password-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3>🔑 Change Password (पासवर्ड परिवर्तन)</h3>
+        <button class="modal-close-btn" onclick="closeModal('change-password-modal')">&times;</button>
+      </div>
+      <form id="change-password-form" onsubmit="handleChangePasswordSubmit(event)">
+        <div class="modal-body">
+          <div style="background: #f8fafc; border-left: 4px solid var(--primary); padding: 0.65rem 0.85rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.82rem; color: #475569;">
+            Update your account password securely. Minimum 6 characters required.
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Current Password (हालको पासवर्ड) *</label>
+            <input type="password" id="cp-current" name="current_password" class="form-control" placeholder="Enter current password" required autocomplete="current-password">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label>New Password (नयाँ पासवर्ड) *</label>
+            <input type="password" id="cp-new" name="new_password" class="form-control" placeholder="Enter new strong password" minlength="6" required autocomplete="new-password">
+          </div>
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label>Confirm New Password (पासवर्ड पुष्टि गर्नुहोस्) *</label>
+            <input type="password" id="cp-confirm" name="confirm_password" class="form-control" placeholder="Confirm new password" minlength="6" required autocomplete="new-password">
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: #64748b;">
+            <input type="checkbox" id="show-password-toggle" onchange="togglePasswordVisibility()">
+            <label for="show-password-toggle" style="margin-bottom: 0; cursor: pointer;">Show Passwords (पासवर्ड देखाउनुहोस्)</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Cancel</button>
+          <button type="submit" id="save-password-btn" class="btn btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 12: Lightbox for Photo Gallery -->
+  <div id="gallery-lightbox-modal" class="modal-backdrop" onclick="closeGalleryLightbox(event)">
+    <div class="modal-dialog" style="max-width: 820px; background: transparent; box-shadow: none; border: none; padding: 0;">
+      <div style="background: #0f172a; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); border: 1px solid #334155;">
+        <div style="position: relative;">
+          <img id="lightbox-img" src="" alt="Gallery Preview" style="width: 100%; max-height: 480px; object-fit: contain; background: #020617; display: block;">
+          <button class="modal-close-btn" onclick="closeModal('gallery-lightbox-modal')" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.25); cursor: pointer;">&times;</button>
+        </div>
+        <div style="padding: 1.25rem 1.5rem; background: #1e293b; color: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div>
+              <span id="lightbox-category" class="badge badge-info" style="font-size: 0.72rem; margin-bottom: 0.35rem; display: inline-block;">Category</span>
+              <h3 id="lightbox-title" style="font-size: 1.2rem; font-weight: 700; color: white; margin: 0.2rem 0;">Title</h3>
+              <div id="lightbox-title-np" style="font-size: 0.92rem; color: #93c5fd; font-weight: 500;">Title Nepali</div>
+            </div>
+            <span style="font-size: 0.8rem; color: #94a3b8;">श्री सगरमाथा माध्यमिक विद्यालय • भद्रपुर-२, झापा</span>
+          </div>
+          <p id="lightbox-caption" style="font-size: 0.88rem; color: #cbd5e1; margin-top: 0.75rem; border-top: 1px solid #334155; padding-top: 0.75rem; line-height: 1.5;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function handleCreateExamSubmit(e) {
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        name: form.name.value.trim(),
+        term: form.term.value,
+        academic_year: form.academic_year.value.trim(),
+        is_published: 1
+      };
+      try {
+        const res = await apiFetch('/api/exams', {
+          method: 'POST',
+          body: payload
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Examination term created successfully!', 'success');
+          closeModal('create-exam-modal');
+          form.reset();
+          await loadExamView();
+          if (data.id) {
+            document.querySelectorAll('.exam-select-dropdown').forEach(sel => {
+              sel.value = data.id;
+            });
+            examData.activeExamId = data.id;
+            await loadSubjectMarksGrid();
+          }
+        } else {
+          showToast(data.error || 'Failed to create exam', 'error');
+        }
+      } catch (err) {
+        showToast('Error saving exam', 'error');
+      }
+    }
+  </script>
+
+  <!-- Load Application Scripts -->
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/public.js"></script>
+  <script src="/static/js/students.js"></script>
+  <script src="/static/js/exam.js"></script>
+  <script src="/static/js/finance.js"></script>
+  <script src="/static/js/reports.js"></script>
+</body>
+</html>

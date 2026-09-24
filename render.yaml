@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: sagarmatha-ems
+    env: python
+    buildCommand: "python3 seed_data.py"
+    startCommand: "python3 app.py"
+    plan: free
