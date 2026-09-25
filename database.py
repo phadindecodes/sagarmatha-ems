@@ -9,11 +9,235 @@ import os
 import json
 import hashlib
 import secrets
+import urllib.request
+import base64
 from datetime import datetime, timedelta
 
+def load_env_file():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+load_env_file()
+
 DB_PATH = os.environ.get("DATABASE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "sagarmatha_ems.db"))
+TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL")
+TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
+
+# ============================================================================
+# Turso Cloud SQLite (libSQL over HTTP Pipeline) Zero-Dependency Adapter
+# ============================================================================
+class TursoRow(dict):
+    """Dictionary-like row that supports column name lookup, indexing, and dict() conversion."""
+    def __init__(self, cols, vals):
+        super().__init__(zip(cols, vals))
+        self._cols = list(cols)
+        self._vals = list(vals)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._vals[key]
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        if isinstance(key, int):
+            return self._vals[key] if 0 <= key < len(self._vals) else default
+        return super().get(key, default)
+
+    def keys(self):
+        return self._cols
+
+class TursoCursor:
+    def __init__(self, conn):
+        self.conn = conn
+        self.description = None
+        self.lastrowid = None
+        self.rowcount = 0
+        self._rows = []
+        self._idx = 0
+
+    def execute(self, sql, params=None):
+        return self.conn._execute_stmt(self, sql, params)
+
+    def executemany(self, sql, seq_of_params):
+        for params in seq_of_params:
+            self.execute(sql, params)
+        return self
+
+    def fetchone(self):
+        if self._idx < len(self._rows):
+            row = self._rows[self._idx]
+            self._idx += 1
+            return row
+        return None
+
+    def fetchall(self):
+        if self._idx < len(self._rows):
+            rows = self._rows[self._idx:]
+            self._idx = len(self._rows)
+            return rows
+        return []
+
+    def close(self):
+        pass
+
+class TursoHTTPConnection:
+    def __init__(self, url, auth_token):
+        clean_url = url
+        if clean_url.startswith("libsql://"):
+            clean_url = clean_url.replace("libsql://", "https://")
+        elif not clean_url.startswith("http://") and not clean_url.startswith("https://"):
+            clean_url = f"https://{clean_url}"
+        self.pipeline_url = f"{clean_url.rstrip('/')}/v2/pipeline"
+        self.auth_token = auth_token
+        self.row_factory = None
+
+    def cursor(self):
+        return TursoCursor(self)
+
+    def execute(self, sql, params=None):
+        cur = self.cursor()
+        cur.execute(sql, params)
+        return cur
+
+    def executemany(self, sql, seq_of_params):
+        cur = self.cursor()
+        cur.executemany(sql, seq_of_params)
+        return cur
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+    def close(self):
+        pass
+
+    def _serialize_arg(self, val):
+        if val is None:
+            return {"type": "null"}
+        elif isinstance(val, bool):
+            return {"type": "integer", "value": "1" if val else "0"}
+        elif isinstance(val, int):
+            return {"type": "integer", "value": str(val)}
+        elif isinstance(val, float):
+            return {"type": "float", "value": val}
+        elif isinstance(val, (bytes, bytearray)):
+            return {"type": "blob", "base64": base64.b64encode(val).decode("ascii")}
+        else:
+            return {"type": "text", "value": str(val)}
+
+    def _deserialize_val(self, v):
+        if not isinstance(v, dict):
+            return v
+        vtype = v.get("type")
+        if vtype == "null":
+            return None
+        elif vtype == "integer":
+            try:
+                return int(v.get("value", 0))
+            except (ValueError, TypeError):
+                return v.get("value")
+        elif vtype == "float":
+            try:
+                return float(v.get("value", 0.0))
+            except (ValueError, TypeError):
+                return v.get("value")
+        elif vtype == "text":
+            return str(v.get("value", ""))
+        elif vtype == "blob":
+            return base64.b64decode(v.get("base64", ""))
+        return v.get("value")
+
+    def _execute_stmt(self, cur, sql, params=None):
+        args = []
+        if params is not None:
+            if isinstance(params, (list, tuple)):
+                args = [self._serialize_arg(p) for p in params]
+            elif isinstance(params, dict):
+                for k, v in params.items():
+                    args.append(self._serialize_arg(v))
+
+        payload = {
+            "requests": [
+                {
+                    "type": "execute",
+                    "stmt": {
+                        "sql": sql,
+                        "args": args
+                    }
+                },
+                {"type": "close"}
+            ]
+        }
+
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            self.pipeline_url,
+            data=data,
+            headers={
+                "Authorization": f"Bearer {self.auth_token}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+
+        with urllib.request.urlopen(req, timeout=20) as res:
+            body = res.read().decode("utf-8")
+            resp_json = json.loads(body)
+
+        results = resp_json.get("results", [])
+        if not results:
+            return cur
+
+        first_res = results[0]
+        if first_res.get("type") == "error":
+            err_msg = first_res.get("error", {}).get("message", "Database error")
+            raise RuntimeError(f"Turso Error: {err_msg}")
+
+        resp_obj = first_res.get("response", {})
+        result_obj = resp_obj.get("result", {})
+
+        cols = [c.get("name") if isinstance(c, dict) else str(c) for c in result_obj.get("cols", [])]
+        cur.description = [(c, None, None, None, None, None, None) for c in cols]
+
+        last_id = result_obj.get("last_insert_rowid")
+        if last_id is not None:
+            try:
+                cur.lastrowid = int(last_id)
+            except (ValueError, TypeError):
+                cur.lastrowid = last_id
+        else:
+            cur.lastrowid = None
+
+        cur.rowcount = result_obj.get("affected_row_count", 0)
+
+        raw_rows = result_obj.get("rows", [])
+        cur._rows = []
+        for r in raw_rows:
+            parsed_vals = [self._deserialize_val(cell) for cell in r]
+            cur._rows.append(TursoRow(cols, parsed_vals))
+        cur._idx = 0
+        return cur
 
 def get_db_connection():
+    turso_url = os.environ.get("TURSO_DATABASE_URL")
+    turso_token = os.environ.get("TURSO_AUTH_TOKEN")
+    if turso_url and turso_token:
+        return TursoHTTPConnection(turso_url, turso_token)
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")

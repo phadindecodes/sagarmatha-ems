@@ -19,7 +19,7 @@ def seed_database(force=False):
             print("Database already contains data. Skipping re-seed to protect live records. (Set FORCE_SEED=1 to reset)")
             conn.close()
             return
-    except sqlite3.OperationalError:
+    except Exception:
         pass
 
     cur.execute("PRAGMA foreign_keys = OFF;")
