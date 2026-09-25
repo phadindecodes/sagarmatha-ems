@@ -401,6 +401,157 @@ def get_staff_user(staff_id):
     conn.close()
     return dict(row) if row else None
 
+def update_staff_member(staff_id, data):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM staff WHERE id = ?;", (staff_id,))
+    if not cur.fetchone():
+        conn.close()
+        return False, "Staff member not found."
+
+    cur.execute("""
+    UPDATE staff SET
+        name_en = ?,
+        name_np = ?,
+        role = ?,
+        department = ?,
+        qualification = ?,
+        phone = ?,
+        email = ?,
+        status = ?
+    WHERE id = ?;
+    """, (
+        data.get('name_en', '').strip(),
+        data.get('name_np', '').strip(),
+        data.get('role', '').strip(),
+        data.get('department', '').strip(),
+        data.get('qualification', '').strip(),
+        data.get('phone', '').strip(),
+        data.get('email', '').strip(),
+        data.get('status', 'Active'),
+        staff_id
+    ))
+
+    # Keep linked user account's full_name in sync if linked
+    name_en = data.get('name_en', '').strip()
+    if name_en:
+        cur.execute("UPDATE users SET full_name = ? WHERE linked_staff_id = ?;", (name_en, staff_id))
+
+    conn.commit()
+    conn.close()
+    return True, "Staff record updated successfully."
+
+def delete_staff_member(staff_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM staff WHERE id = ?;", (staff_id,))
+    if not cur.fetchone():
+        conn.close()
+        return False, "Staff member not found."
+
+    # If there is a linked user, remove sessions and delete user account
+    cur.execute("SELECT id FROM users WHERE linked_staff_id = ?;", (staff_id,))
+    user_rows = cur.fetchall()
+    for u in user_rows:
+        uid = u['id'] if isinstance(u, dict) else u[0]
+        cur.execute("DELETE FROM sessions WHERE user_id = ?;", (uid,))
+        cur.execute("DELETE FROM users WHERE id = ?;", (uid,))
+
+    cur.execute("DELETE FROM staff WHERE id = ?;", (staff_id,))
+    conn.commit()
+    conn.close()
+    return True, "Staff member and associated login account removed successfully."
+
+def update_user_account(user_id, full_name, username, role):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username FROM users WHERE id = ?;", (user_id,))
+    existing = cur.fetchone()
+    if not existing:
+        conn.close()
+        return False, "User not found."
+
+    username = username.strip()
+    full_name = full_name.strip()
+    cur.execute("SELECT id FROM users WHERE username = ? AND id != ?;", (username, user_id))
+    if cur.fetchone():
+        conn.close()
+        return False, f"Username '{username}' is already in use."
+
+    cur.execute("""
+    UPDATE users SET
+        full_name = ?,
+        username = ?,
+        role = ?
+    WHERE id = ?;
+    """, (full_name, username, role, user_id))
+
+    # If linked to staff, also update staff name_en
+    cur.execute("SELECT linked_staff_id FROM users WHERE id = ?;", (user_id,))
+    row = cur.fetchone()
+    if row:
+        staff_id = row['linked_staff_id'] if isinstance(row, dict) else row[0]
+        if staff_id:
+            cur.execute("UPDATE staff SET name_en = ? WHERE id = ?;", (full_name, staff_id))
+
+    conn.commit()
+    conn.close()
+    return True, "User account updated successfully."
+
+def delete_user_account(user_id, current_user_id=None):
+    if current_user_id and str(user_id) == str(current_user_id):
+        return False, "You cannot delete your own currently logged-in account."
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, role, username FROM users WHERE id = ?;", (user_id,))
+    user = cur.fetchone()
+    if not user:
+        conn.close()
+        return False, "User not found."
+
+    role = user['role'] if isinstance(user, dict) else user[1]
+    if role == 'admin':
+        # Ensure we don't delete the last admin
+        cur.execute("SELECT COUNT(*) as admin_count FROM users WHERE role = 'admin' AND status = 'Active';")
+        cnt_row = cur.fetchone()
+        cnt = cnt_row['admin_count'] if isinstance(cnt_row, dict) else cnt_row[0]
+        if cnt <= 1:
+            conn.close()
+            return False, "Cannot delete the sole administrator account."
+
+    cur.execute("DELETE FROM sessions WHERE user_id = ?;", (user_id,))
+    cur.execute("DELETE FROM users WHERE id = ?;", (user_id,))
+    conn.commit()
+    conn.close()
+    return True, "User account deleted successfully."
+
+def delete_student_record(student_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, reg_no FROM students WHERE id = ?;", (student_id,))
+    st = cur.fetchone()
+    if not st:
+        conn.close()
+        return False, "Student not found."
+
+    # Delete linked user account and sessions
+    cur.execute("SELECT id FROM users WHERE linked_student_id = ?;", (student_id,))
+    users = cur.fetchall()
+    for u in users:
+        uid = u['id'] if isinstance(u, dict) else u[0]
+        cur.execute("DELETE FROM sessions WHERE user_id = ?;", (uid,))
+        cur.execute("DELETE FROM users WHERE id = ?;", (uid,))
+
+    # Cascading deletes
+    cur.execute("DELETE FROM marks WHERE student_id = ?;", (student_id,))
+    cur.execute("DELETE FROM attendance WHERE student_id = ?;", (student_id,))
+    cur.execute("DELETE FROM invoices WHERE student_id = ?;", (student_id,))
+    cur.execute("DELETE FROM students WHERE id = ?;", (student_id,))
+    conn.commit()
+    conn.close()
+    return True, "Student record and associated records deleted successfully."
+
 def bulk_create_student_accounts(class_id=None, default_password="sagarmatha@2081"):
     conn = get_db_connection()
     cur = conn.cursor()

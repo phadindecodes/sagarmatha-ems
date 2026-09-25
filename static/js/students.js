@@ -62,7 +62,7 @@ function renderStudentsTable(students) {
         <span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-neutral'}">${s.status}</span>
       </td>
       <td>
-        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
           <button class="btn btn-secondary btn-sm" onclick="viewStudentProfile(${s.id})" title="View Profile">
             👁️
           </button>
@@ -71,6 +71,9 @@ function renderStudentsTable(students) {
           </button>
           <button class="btn btn-accent btn-sm" onclick="generateStudentMarksheet(${s.id})" title="Grade Sheet">
             📄 Grade
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="openEditStudentModal(${s.id})" title="Edit Student">
+            ✏️
           </button>
           ${s.portal_user_id ? `
             <button class="btn btn-outline btn-sm" onclick="openAdminResetPasswordModal(${s.portal_user_id}, '${s.portal_username}')" title="Reset Student Portal Password">
@@ -81,6 +84,9 @@ function renderStudentsTable(students) {
               ➕🔑
             </button>
           `}
+          <button class="btn btn-danger btn-sm" onclick="deleteStudentRecord(${s.id}, '${s.first_name} ${s.last_name}')" title="Delete Student Record">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>
@@ -293,3 +299,111 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Student Edit & Delete Handlers
+async function openEditStudentModal(studentId) {
+  try {
+    const res = await apiFetch(`/api/students/${studentId}`);
+    if (!res.ok) {
+      showToast('Failed to load student details', 'error');
+      return;
+    }
+    const st = await res.json();
+
+    const classDropdown = document.getElementById('edit-student-class-id');
+    if (classDropdown && State.classes) {
+      classDropdown.innerHTML = State.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+
+    document.getElementById('edit-student-id').value = st.id;
+    document.getElementById('edit-student-reg-no').value = st.reg_no || '';
+    document.getElementById('edit-student-roll-no').value = st.roll_no || 1;
+    document.getElementById('edit-student-first-name').value = st.first_name || '';
+    document.getElementById('edit-student-last-name').value = st.last_name || '';
+    document.getElementById('edit-student-name-np').value = st.name_np || '';
+    document.getElementById('edit-student-gender').value = st.gender || 'Male';
+    document.getElementById('edit-student-dob-bs').value = st.dob_bs || '';
+    document.getElementById('edit-student-dob-ad').value = st.dob_ad || '';
+    document.getElementById('edit-student-blood-group').value = st.blood_group || 'B+';
+    document.getElementById('edit-student-guardian-name').value = st.guardian_name || '';
+    document.getElementById('edit-student-guardian-relation').value = st.guardian_relation || 'Father';
+    document.getElementById('edit-student-guardian-phone').value = st.guardian_phone || '';
+    document.getElementById('edit-student-address').value = st.address || '';
+    document.getElementById('edit-student-status').value = st.status || 'Active';
+
+    if (classDropdown && st.class_id) classDropdown.value = st.class_id;
+    const secDropdown = document.getElementById('edit-student-section-id');
+    if (secDropdown && st.section_id) secDropdown.value = st.section_id;
+
+    openModal('edit-student-modal');
+  } catch (err) {
+    showToast('Network error loading student details', 'error');
+  }
+}
+
+async function handleEditStudentSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const studentId = document.getElementById('edit-student-id').value;
+  const payload = {
+    roll_no: form.roll_no.value,
+    first_name: form.first_name.value.trim(),
+    last_name: form.last_name.value.trim(),
+    name_np: form.name_np.value.trim(),
+    gender: form.gender.value,
+    dob_bs: form.dob_bs.value.trim(),
+    dob_ad: form.dob_ad.value.trim(),
+    class_id: form.class_id.value,
+    section_id: form.section_id.value,
+    guardian_name: form.guardian_name.value.trim(),
+    guardian_relation: form.guardian_relation.value,
+    guardian_phone: form.guardian_phone.value.trim(),
+    address: form.address.value.trim(),
+    blood_group: form.blood_group.value,
+    status: form.status.value
+  };
+
+  try {
+    const res = await apiFetch(`/api/students/${studentId}`, {
+      method: 'PUT',
+      body: payload
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Student details updated successfully!', 'success');
+      closeModal('edit-student-modal');
+      loadStudentsView();
+      if (typeof loadUsersManagementView === 'function') {
+        loadUsersManagementView();
+      }
+    } else {
+      showToast(data.error || 'Failed to update student', 'error');
+    }
+  } catch (err) {
+    showToast('Network error updating student', 'error');
+  }
+}
+
+async function deleteStudentRecord(studentId, studentName) {
+  if (!confirm(`Are you sure you want to permanently delete student "${studentName}"?\n\nWARNING: This will permanently remove all their exam marks, attendance records, fee invoices, and portal login account.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/api/students/${studentId}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Student "${studentName}" deleted successfully`, 'success');
+      loadStudentsView();
+      if (typeof loadUsersManagementView === 'function') {
+        loadUsersManagementView();
+      }
+    } else {
+      showToast(data.error || 'Failed to delete student', 'error');
+    }
+  } catch (err) {
+    showToast('Network error deleting student', 'error');
+  }
+}

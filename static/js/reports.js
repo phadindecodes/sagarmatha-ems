@@ -7,14 +7,14 @@ async function loadStaffView() {
   const tbody = document.getElementById('staff-table-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="7" class="text-center">Loading faculty & staff directory...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="8" class="text-center">Loading faculty & staff directory...</td></tr>';
 
   try {
-    const res = await fetch('/api/staff');
+    const res = await apiFetch('/api/staff');
     const staff = await res.json();
 
     if (staff.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No staff records found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No staff records found.</td></tr>';
       return;
     }
 
@@ -30,10 +30,20 @@ async function loadStaffView() {
         <td>${s.qualification}</td>
         <td>📞 ${s.phone}</td>
         <td><span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-neutral'}">${s.status}</span></td>
+        <td style="text-align: right;">
+          <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+            <button class="btn btn-secondary btn-sm" onclick="openEditStaffModal(${s.id})" title="Edit Staff Details">
+              ✏️ Edit
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="deleteStaffMember(${s.id}, '${s.name_en.replace(/'/g, "\\'")}')" title="Delete Staff Member">
+              🗑️
+            </button>
+          </div>
+        </td>
       </tr>
     `).join('');
   } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load staff list.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load staff list.</td></tr>';
   }
 }
 
@@ -312,3 +322,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Staff Edit & Delete Handlers
+async function openEditStaffModal(staffId) {
+  try {
+    const res = await apiFetch(`/api/staff/${staffId}`);
+    if (!res.ok) {
+      showToast('Failed to load staff details', 'error');
+      return;
+    }
+    const s = await res.json();
+    document.getElementById('edit-staff-id').value = s.id;
+    document.getElementById('edit-staff-emp-code').value = s.emp_code || '';
+    document.getElementById('edit-staff-name-en').value = s.name_en || '';
+    document.getElementById('edit-staff-name-np').value = s.name_np || '';
+    document.getElementById('edit-staff-role').value = s.role || '';
+    document.getElementById('edit-staff-department').value = s.department || 'Science';
+    document.getElementById('edit-staff-qualification').value = s.qualification || '';
+    document.getElementById('edit-staff-phone').value = s.phone || '';
+    document.getElementById('edit-staff-email').value = s.email || '';
+    document.getElementById('edit-staff-status').value = s.status || 'Active';
+
+    openModal('edit-staff-modal');
+  } catch (err) {
+    showToast('Network error loading staff record', 'error');
+  }
+}
+
+async function handleEditStaffSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const staffId = document.getElementById('edit-staff-id').value;
+  const payload = {
+    name_en: form.name_en.value.trim(),
+    name_np: form.name_np.value.trim(),
+    role: form.role.value.trim(),
+    department: form.department.value,
+    qualification: form.qualification.value.trim(),
+    phone: form.phone.value.trim(),
+    email: form.email.value.trim(),
+    status: form.status.value
+  };
+
+  try {
+    const res = await apiFetch(`/api/staff/${staffId}`, {
+      method: 'PUT',
+      body: payload
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Staff record updated successfully!', 'success');
+      closeModal('edit-staff-modal');
+      loadStaffView();
+      if (typeof loadUsersManagementView === 'function') {
+        loadUsersManagementView();
+      }
+    } else {
+      showToast(data.error || 'Failed to update staff record', 'error');
+    }
+  } catch (err) {
+    showToast('Network error updating staff record', 'error');
+  }
+}
+
+async function deleteStaffMember(staffId, staffName) {
+  if (!confirm(`Are you sure you want to delete staff member "${staffName}"?\n\nThis will also remove any linked portal login account.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/api/staff/${staffId}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Staff member "${staffName}" removed successfully`, 'success');
+      loadStaffView();
+      if (typeof loadUsersManagementView === 'function') {
+        loadUsersManagementView();
+      }
+    } else {
+      showToast(data.error || 'Failed to delete staff member', 'error');
+    }
+  } catch (err) {
+    showToast('Network error deleting staff member', 'error');
+  }
+}

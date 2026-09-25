@@ -26,7 +26,12 @@ from database import (
     toggle_user_status,
     get_student_user,
     get_staff_user,
-    bulk_create_student_accounts
+    bulk_create_student_accounts,
+    update_staff_member,
+    delete_staff_member,
+    update_user_account,
+    delete_user_account,
+    delete_student_record
 )
 
 HOST = os.environ.get("HOST", "0.0.0.0")
@@ -823,6 +828,17 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(rows)
             return
 
+        if path.startswith("/api/staff/"):
+            staff_id = path.split("/")[-1]
+            cur.execute("SELECT * FROM staff WHERE id = ?;", (staff_id,))
+            row = cur.fetchone()
+            conn.close()
+            if not row:
+                self.send_json({"error": "Staff member not found."}, 404)
+            else:
+                self.send_json(dict(row))
+            return
+
         # 13. Student Attendance
         if path == "/api/attendance":
             cid = q('class_id')
@@ -892,6 +908,24 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             rows = [dict(r) for r in cur.fetchall()]
             conn.close()
             self.send_json(rows)
+            return
+
+        if path.startswith("/api/users/"):
+            if role != "admin":
+                conn.close()
+                self.send_json({"error": "Access denied. Admin only."}, 403)
+                return
+            user_id = path.split("/")[-1]
+            cur.execute("""
+            SELECT id, username, full_name, role, status, linked_student_id, linked_staff_id, created_at
+            FROM users WHERE id = ?;
+            """, (user_id,))
+            row = cur.fetchone()
+            conn.close()
+            if not row:
+                self.send_json({"error": "User not found."}, 404)
+            else:
+                self.send_json(dict(row))
             return
 
         conn.close()
@@ -1466,6 +1500,32 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_json({"success": True, "message": msg, "status": new_status})
                 return
 
+            # User Details Edit (Admin only)
+            if path.startswith("/api/users/") and len(path.split("/")) == 4:
+                target_user_id = int(path.split("/")[3])
+                full_name = body.get('full_name', '').strip()
+                username = body.get('username', '').strip()
+                new_role = body.get('role', '').strip()
+                if not full_name or not username or not new_role:
+                    self.send_json({"error": "Full name, username, and role are required."}, 400)
+                    return
+                success, msg = update_user_account(target_user_id, full_name, username, new_role)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
+            # Staff Member Edit (Admin only)
+            if path.startswith("/api/staff/") and len(path.split("/")) == 4:
+                staff_id = int(path.split("/")[3])
+                success, msg = update_staff_member(staff_id, body)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
             conn = get_db_connection()
             cur = conn.cursor()
 
@@ -1511,6 +1571,57 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
 
             conn.close()
             self.send_json({"error": "Unknown PUT route"}, 404)
+
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        user = self.get_current_user()
+        if not user:
+            self.send_json({"error": "Authentication required."}, 401)
+            return
+
+        role = user['role']
+        if role != "admin":
+            self.send_json({"error": "Access denied. Admin only."}, 403)
+            return
+
+        try:
+            # Delete Staff Member
+            if path.startswith("/api/staff/"):
+                staff_id = int(path.split("/")[-1])
+                success, msg = delete_staff_member(staff_id)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
+            # Delete User Account
+            if path.startswith("/api/users/"):
+                target_user_id = int(path.split("/")[-1])
+                curr_uid = user.get('user_id') or user.get('id')
+                success, msg = delete_user_account(target_user_id, current_user_id=curr_uid)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
+            # Delete Student Record
+            if path.startswith("/api/students/"):
+                student_id = int(path.split("/")[-1])
+                success, msg = delete_student_record(student_id)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
+            self.send_json({"error": "Unknown DELETE route"}, 404)
 
         except Exception as e:
             self.send_json({"error": str(e)}, 500)

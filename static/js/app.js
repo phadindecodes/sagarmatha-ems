@@ -857,12 +857,18 @@ function filterUsersTable() {
         </td>
         <td style="font-size: 0.8rem; color: #64748b;">${createdDate}</td>
         <td style="text-align: right;">
-          <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
-            <button class="btn btn-secondary btn-sm" onclick="openAdminResetPasswordModal(${u.id}, '${u.username}', '${u.full_name.replace(/'/g, "\\'")}')" title="Reset Password" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
+          <div style="display: flex; gap: 0.35rem; justify-content: flex-end; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="openEditUserModal(${u.id})" title="Edit User Account" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
+              ✏️ Edit
+            </button>
+            <button class="btn btn-neutral btn-sm" onclick="openAdminResetPasswordModal(${u.id}, '${u.username}', '${u.full_name.replace(/'/g, "\\'")}')" title="Reset Password" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
               🔑 Reset
             </button>
             <button class="btn ${u.status === 'Active' ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="handleToggleUserStatus(${u.id}, '${u.status}')" title="${u.status === 'Active' ? 'Deactivate' : 'Activate'}" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
               ${u.status === 'Active' ? '🚫 Deactivate' : '✓ Activate'}
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="deleteUserAccount(${u.id}, '${u.username}')" title="Delete User Account" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
+              🗑️
             </button>
           </div>
         </td>
@@ -1133,5 +1139,82 @@ function renderPrintableLoginSlips(data) {
   `;
 
   openModal('printable-slips-modal');
+}
+
+// User Edit & Delete Handlers
+async function openEditUserModal(userId) {
+  try {
+    const res = await apiFetch(`/api/users/${userId}`);
+    if (!res.ok) {
+      showToast('Failed to load user account details', 'error');
+      return;
+    }
+    const u = await res.json();
+    document.getElementById('edit-user-id').value = u.id;
+    document.getElementById('edit-user-username').value = u.username || '';
+    document.getElementById('edit-user-fullname').value = u.full_name || '';
+    document.getElementById('edit-user-role').value = u.role || 'teacher';
+
+    openModal('edit-user-modal');
+  } catch (err) {
+    showToast('Network error loading user details', 'error');
+  }
+}
+
+async function handleEditUserSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const userId = document.getElementById('edit-user-id').value;
+  const payload = {
+    username: form.username.value.trim(),
+    full_name: form.full_name.value.trim(),
+    role: form.role.value
+  };
+
+  try {
+    const res = await apiFetch(`/api/users/${userId}`, {
+      method: 'PUT',
+      body: payload
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('User account updated successfully!', 'success');
+      closeModal('edit-user-modal');
+      loadUsersManagementView();
+      if (typeof loadStaffView === 'function') {
+        loadStaffView();
+      }
+    } else {
+      showToast(data.error || 'Failed to update user account', 'error');
+    }
+  } catch (err) {
+    showToast('Network error updating user account', 'error');
+  }
+}
+
+async function deleteUserAccount(userId, username) {
+  if (State.currentUser && State.currentUser.id === userId) {
+    showToast('You cannot delete your own currently logged-in account!', 'error');
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to permanently delete user account "${username}"?\n\nThis will revoke their access to the portal immediately.`)) {
+    return;
+  }
+
+  try {
+    const res = await apiFetch(`/api/users/${userId}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`User account "${username}" deleted successfully`, 'success');
+      loadUsersManagementView();
+    } else {
+      showToast(data.error || 'Failed to delete user account', 'error');
+    }
+  } catch (err) {
+    showToast('Network error deleting user account', 'error');
+  }
 }
 
