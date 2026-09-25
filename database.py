@@ -726,6 +726,56 @@ def init_db():
     );
     """)
 
+        # Ensure default school info exists
+    try:
+        cursor.execute("SELECT COUNT(*) as cnt FROM school_info;")
+        si_row = cursor.fetchone()
+        si_count = si_row['cnt'] if isinstance(si_row, dict) else (si_row[0] if si_row else 0)
+        if si_count == 0:
+            cursor.execute("""
+            INSERT INTO school_info (
+                id, name_en, name_np, tagline_en, tagline_np,
+                address_en, address_np, established_bs, email, phone, website, academic_year
+            ) VALUES (
+                1,
+                'Shree Sagarmatha Secondary School',
+                'श्री सगरमाथा माध्यमिक विद्यालय',
+                'Centrally Located Community School Dedicated to Academic Excellence & Holistic Growth',
+                'सामुदायिक शिक्षामा उत्कृष्टता, प्रविधिमैत्री सिकाइ र समग्र विकास',
+                'Bhadrapur-2, Sagarmatha, Jhapa, Koshi Province, Nepal',
+                'भद्रपुर-२, सगरमाथा, झापा, कोशी प्रदेश, नेपाल',
+                2034,
+                'info@sagarmathaschool.edu.np',
+                '023-520134, 9842601234',
+                'www.sagarmathaschool.edu.np',
+                '2081'
+            );
+            """)
+    except Exception as e:
+        print(f"School info init note: {e}")
+
+    # Ensure default RBAC user accounts exist so login NEVER fails on blank databases
+    try:
+        cursor.execute("SELECT COUNT(*) as cnt FROM users;")
+        u_row = cursor.fetchone()
+        u_count = u_row['cnt'] if isinstance(u_row, dict) else (u_row[0] if u_row else 0)
+        if u_count == 0:
+            default_accounts = [
+                ('admin', 'admin123', 'Ram Prasad Adhikari (Principal)', 'admin'),
+                ('teacher', 'teacher123', 'Dr. Janak Raj Bhattarai (Exam Coordinator)', 'teacher'),
+                ('accountant', 'account123', 'Manoj Kumar Shrestha (Senior Bursar)', 'accountant'),
+                ('student10', 'student123', 'Aayush Adhikari (Student Class 10)', 'student')
+            ]
+            for uname, pwd, fname, role in default_accounts:
+                pwd_hash, salt = hash_password(pwd)
+                cursor.execute("""
+                INSERT INTO users (username, password_hash, salt, full_name, role, status)
+                VALUES (?, ?, ?, ?, ?, 'Active');
+                """, (uname, pwd_hash, salt, fname, role))
+            print("Default RBAC accounts initialized successfully.")
+    except Exception as e:
+        print(f"Users init note: {e}")
+
     conn.commit()
     conn.close()
     print("Database initialized successfully with RBAC.")
