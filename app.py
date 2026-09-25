@@ -1370,6 +1370,11 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
 
 def run_server(host=HOST, port=PORT):
     init_db()
+    try:
+        from seed_data import seed_database
+        seed_database()
+    except Exception as e:
+        print(f"Initial seed check: {e}")
     server = ThreadedHTTPServer((host, port), EMSRequestHandler)
     print(f"================================================================")
     print(f"  Shree Sagarmatha Secondary School & Sagarmatha EMS Server")
