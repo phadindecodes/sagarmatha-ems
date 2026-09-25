@@ -43,7 +43,10 @@ function renderStudentsTable(students) {
 
   tbody.innerHTML = students.map(s => `
     <tr>
-      <td class="font-bold">${s.reg_no}</td>
+      <td class="font-bold">
+        <div>${s.reg_no}</div>
+        ${s.portal_username ? `<span class="badge badge-success" style="font-size: 0.68rem; margin-top: 3px; display: inline-block;" title="Portal Login Username: ${s.portal_username}">🔑 ${s.portal_username}</span>` : `<span class="badge badge-neutral" style="font-size: 0.68rem; margin-top: 3px; display: inline-block;" title="No portal account yet">No login</span>`}
+      </td>
       <td><strong>${s.roll_no}</strong></td>
       <td>
         <div style="font-weight: 700; color: #0f172a;">${s.first_name} ${s.last_name}</div>
@@ -59,7 +62,7 @@ function renderStudentsTable(students) {
         <span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-neutral'}">${s.status}</span>
       </td>
       <td>
-        <div style="display: flex; gap: 0.4rem;">
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
           <button class="btn btn-secondary btn-sm" onclick="viewStudentProfile(${s.id})" title="View Profile">
             👁️
           </button>
@@ -69,10 +72,47 @@ function renderStudentsTable(students) {
           <button class="btn btn-accent btn-sm" onclick="generateStudentMarksheet(${s.id})" title="Grade Sheet">
             📄 Grade
           </button>
+          ${s.portal_user_id ? `
+            <button class="btn btn-outline btn-sm" onclick="openAdminResetPasswordModal(${s.portal_user_id}, '${s.portal_username}')" title="Reset Student Portal Password">
+              🔑
+            </button>
+          ` : `
+            <button class="btn btn-neutral btn-sm" onclick="quickCreateStudentAccount(${s.id}, '${s.reg_no}', '${s.first_name} ${s.last_name}')" title="Generate Portal Account">
+              ➕🔑
+            </button>
+          `}
         </div>
       </td>
     </tr>
   `).join('');
+}
+
+async function quickCreateStudentAccount(studentId, regNo, studentName) {
+  if (!confirm(`Create portal login account for student "${studentName}" with username "${regNo}" and default password "sagarmatha@2081"?`)) {
+    return;
+  }
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: regNo,
+        password: 'sagarmatha@2081',
+        full_name: studentName,
+        role: 'student',
+        linked_student_id: studentId
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Student portal account created for ${regNo}`, 'success');
+      loadStudentsView();
+    } else {
+      showToast(data.error || 'Failed to create student account', 'error');
+    }
+  } catch (err) {
+    showToast('Failed to connect to server', 'error');
+  }
 }
 
 async function viewStudentProfile(id) {
@@ -109,6 +149,7 @@ async function viewStudentProfile(id) {
         <div><strong>Guardian Phone:</strong> ${st.guardian_phone}</div>
         <div><strong>Admission Date:</strong> ${st.admission_date || 'N/A'}</div>
         <div><strong>Status:</strong> ${st.status}</div>
+        <div><strong>Portal Login Account:</strong> ${st.portal_username ? `<span class="badge badge-success">Active (${st.portal_username})</span>` : '<span class="badge badge-neutral">No account</span>'}</div>
       </div>
     `;
 

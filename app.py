@@ -21,7 +21,12 @@ from database import (
     validate_session,
     delete_session,
     create_user,
-    change_user_password
+    change_user_password,
+    reset_user_password,
+    toggle_user_status,
+    get_student_user,
+    get_staff_user,
+    bulk_create_student_accounts
 )
 
 HOST = os.environ.get("HOST", "0.0.0.0")
@@ -323,10 +328,12 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             if role == "student":
                 # A student can only view their own record
                 cur.execute("""
-                SELECT s.*, c.name AS class_name, sec.name AS section_name
+                SELECT s.*, c.name AS class_name, sec.name AS section_name,
+                       u.id AS portal_user_id, u.username AS portal_username, u.status AS portal_user_status
                 FROM students s
                 JOIN classes c ON s.class_id = c.id
                 JOIN sections sec ON s.section_id = sec.id
+                LEFT JOIN users u ON u.linked_student_id = s.id
                 WHERE s.id = ?;
                 """, (student_id_override,))
                 rows = [dict(r) for r in cur.fetchall()]
@@ -340,10 +347,12 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             status = q('status', 'Active')
 
             sql = """
-            SELECT s.*, c.name AS class_name, sec.name AS section_name
+            SELECT s.*, c.name AS class_name, sec.name AS section_name,
+                   u.id AS portal_user_id, u.username AS portal_username, u.status AS portal_user_status
             FROM students s
             JOIN classes c ON s.class_id = c.id
             JOIN sections sec ON s.section_id = sec.id
+            LEFT JOIN users u ON u.linked_student_id = s.id
             WHERE 1=1
             """
             params = []
@@ -376,10 +385,12 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             cur.execute("""
-            SELECT s.*, c.name AS class_name, sec.name AS section_name
+            SELECT s.*, c.name AS class_name, sec.name AS section_name,
+                   u.id AS portal_user_id, u.username AS portal_username, u.status AS portal_user_status
             FROM students s
             JOIN classes c ON s.class_id = c.id
             JOIN sections sec ON s.section_id = sec.id
+            LEFT JOIN users u ON u.linked_student_id = s.id
             WHERE s.id = ?;
             """, (student_id,))
             student = cur.fetchone()
@@ -866,7 +877,18 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_json({"error": "Access denied. Admin only."}, 403)
                 return
 
-            cur.execute("SELECT id, username, full_name, role, status, created_at FROM users ORDER BY id ASC;")
+            cur.execute("""
+            SELECT u.id, u.username, u.full_name, u.role, u.status, u.created_at,
+                   u.linked_student_id, u.linked_staff_id,
+                   s.reg_no as student_reg_no, s.roll_no as student_roll_no, c.name as student_class_name, sec.name as student_section_name,
+                   stf.emp_code as staff_emp_code, stf.role as staff_role, stf.department as staff_department
+            FROM users u
+            LEFT JOIN students s ON u.linked_student_id = s.id
+            LEFT JOIN classes c ON s.class_id = c.id
+            LEFT JOIN sections sec ON s.section_id = sec.id
+            LEFT JOIN staff stf ON u.linked_staff_id = stf.id
+            ORDER BY u.id ASC;
+            """)
             rows = [dict(r) for r in cur.fetchall()]
             conn.close()
             self.send_json(rows)
@@ -1007,9 +1029,75 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
                     body.get('status', 'Active')
                 ))
                 new_id = cur.lastrowid
+
+                # Auto-create student login account using Registration Number
+                reg_no = body.get('reg_no', '').strip()
+                if reg_no:
+                    from database import hash_password
+                    default_pwd = body.get('account_password', 'sagarmatha@2081').strip()
+                    p_hash, salt = hash_password(default_pwd)
+                    full_name = f"{body.get('first_name')} {body.get('last_name')}".strip()
+                    cur.execute("""
+                    INSERT OR IGNORE INTO users (username, password_hash, salt, full_name, role, linked_student_id, status)
+                    VALUES (?, ?, ?, ?, 'student', ?, 'Active');
+                    """, (reg_no, p_hash, salt, full_name, new_id))
+
                 conn.commit()
                 conn.close()
-                self.send_json({"success": True, "id": new_id, "message": "Student admitted successfully."})
+                self.send_json({
+                    "success": True,
+                    "id": new_id,
+                    "username": reg_no,
+                    "message": f"Student admitted successfully. Portal login created with username '{reg_no}'."
+                })
+                return
+
+            # User Account Management (Admin only)
+            if path == "/api/users":
+                if role not in ["admin"]:
+                    conn.close()
+                    self.send_json({"error": "Access denied. Only Administrators can manage accounts."}, 403)
+                    return
+                username = body.get('username', '').strip()
+                password = body.get('password', '').strip()
+                full_name = body.get('full_name', '').strip()
+                user_role = body.get('role', 'student').strip().lower()
+                linked_student_id = body.get('linked_student_id')
+                linked_staff_id = body.get('linked_staff_id')
+
+                if not username or not password or not full_name:
+                    conn.close()
+                    self.send_json({"error": "Username, password, and full name are required."}, 400)
+                    return
+
+                if len(password) < 6:
+                    conn.close()
+                    self.send_json({"error": "Password must be at least 6 characters long."}, 400)
+                    return
+
+                cur.execute("SELECT id FROM users WHERE username = ?;", (username,))
+                if cur.fetchone():
+                    conn.close()
+                    self.send_json({"error": f"Username '{username}' already exists. Please choose a different username."}, 400)
+                    return
+
+                new_user_id = create_user(username, password, full_name, user_role, linked_student_id, linked_staff_id)
+                conn.close()
+                self.send_json({"success": True, "id": new_user_id, "message": f"User account '{username}' created successfully."})
+                return
+
+            # Bulk Generate Student Accounts (Admin only)
+            if path == "/api/students/generate-accounts":
+                if role not in ["admin"]:
+                    conn.close()
+                    self.send_json({"error": "Access denied. Only Administrators can bulk-generate student accounts."}, 403)
+                    return
+                conn.close()
+                class_id = body.get('class_id')
+                class_id = int(class_id) if class_id else None
+                default_password = body.get('default_password', 'sagarmatha@2081').strip()
+                result = bulk_create_student_accounts(class_id=class_id, default_password=default_password)
+                self.send_json(result)
                 return
 
             # 2. Bulk Marks Entry (Admin & Teacher)
@@ -1255,6 +1343,26 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
                     body.get('status', 'Active')
                 ))
                 new_id = cur.lastrowid
+
+                # Create staff login account if username & password provided
+                username = body.get('username', '').strip()
+                staff_pwd = body.get('password', '').strip()
+                if username and len(staff_pwd) >= 6:
+                    from database import hash_password
+                    p_hash, salt = hash_password(staff_pwd)
+                    s_name = body.get('name_en')
+                    s_role_str = body.get('role', 'Teacher').lower()
+                    if 'principal' in s_role_str or 'admin' in s_role_str:
+                        u_role = 'admin'
+                    elif 'account' in s_role_str or 'bursar' in s_role_str:
+                        u_role = 'accountant'
+                    else:
+                        u_role = 'teacher'
+                    cur.execute("""
+                    INSERT OR IGNORE INTO users (username, password_hash, salt, full_name, role, linked_staff_id, status)
+                    VALUES (?, ?, ?, ?, ?, ?, 'Active');
+                    """, (username, p_hash, salt, s_name, u_role, new_id))
+
                 conn.commit()
                 conn.close()
                 self.send_json({"success": True, "id": new_id, "message": "Staff added successfully."})
@@ -1336,6 +1444,28 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             return
 
         try:
+            # User Password Reset (Admin only)
+            if path.startswith("/api/users/") and path.endswith("/reset-password"):
+                target_user_id = int(path.split("/")[3])
+                new_password = body.get('new_password', '').strip()
+                success, msg = reset_user_password(target_user_id, new_password)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg})
+                return
+
+            # User Status Toggle (Admin only)
+            if path.startswith("/api/users/") and path.endswith("/status"):
+                target_user_id = int(path.split("/")[3])
+                new_status = body.get('status')
+                success, msg = toggle_user_status(target_user_id, new_status)
+                if not success:
+                    self.send_json({"error": msg}, 400)
+                else:
+                    self.send_json({"success": True, "message": msg, "status": new_status})
+                return
+
             conn = get_db_connection()
             cur = conn.cursor()
 

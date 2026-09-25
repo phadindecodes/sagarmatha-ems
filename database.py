@@ -349,6 +349,133 @@ def change_user_password(user_id, current_password, new_password):
     conn.close()
     return True, "Password has been successfully changed."
 
+def reset_user_password(user_id, new_password):
+    if not new_password or len(new_password) < 6:
+        return False, "Password must be at least 6 characters long."
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM users WHERE id = ?;", (user_id,))
+    if not cur.fetchone():
+        conn.close()
+        return False, "User not found."
+    new_hash, new_salt = hash_password(new_password)
+    cur.execute("UPDATE users SET password_hash = ?, salt = ? WHERE id = ?;", (new_hash, new_salt, user_id))
+    cur.execute("DELETE FROM sessions WHERE user_id = ?;", (user_id,))
+    conn.commit()
+    conn.close()
+    return True, "Password has been successfully reset."
+
+def toggle_user_status(user_id, new_status=None):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, status FROM users WHERE id = ?;", (user_id,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return False, "User not found."
+    
+    current_status = row['status'] if isinstance(row, dict) else row[1]
+    if not new_status:
+        new_status = 'Inactive' if current_status == 'Active' else 'Active'
+    
+    cur.execute("UPDATE users SET status = ? WHERE id = ?;", (new_status, user_id))
+    if new_status == 'Inactive':
+        cur.execute("DELETE FROM sessions WHERE user_id = ?;", (user_id,))
+    conn.commit()
+    conn.close()
+    return True, f"User status updated to {new_status}."
+
+def get_student_user(student_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username, full_name, role, status, created_at FROM users WHERE linked_student_id = ?;", (student_id,))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def get_staff_user(staff_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username, full_name, role, status, created_at FROM users WHERE linked_staff_id = ?;", (staff_id,))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def bulk_create_student_accounts(class_id=None, default_password="sagarmatha@2081"):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    query = """
+    SELECT s.id, s.reg_no, s.roll_no, s.first_name, s.last_name, s.name_np, c.name as class_name, sec.name as section_name
+    FROM students s
+    JOIN classes c ON s.class_id = c.id
+    JOIN sections sec ON s.section_id = sec.id
+    WHERE s.status = 'Active'
+    """
+    params = []
+    if class_id:
+        query += " AND s.class_id = ?"
+        params.append(class_id)
+    query += " ORDER BY c.numeric_level ASC, sec.name ASC, s.roll_no ASC;"
+
+    cur.execute(query, tuple(params))
+    students = [dict(r) for r in cur.fetchall()]
+
+    cur.execute("SELECT linked_student_id, username FROM users WHERE linked_student_id IS NOT NULL;")
+    existing_users = {r['linked_student_id']: r['username'] for r in [dict(row) for row in cur.fetchall()]}
+
+    created_accounts = []
+    pwd_hash, salt = hash_password(default_password)
+
+    for st in students:
+        sid = st['id']
+        reg = st['reg_no'].strip()
+        full_name = f"{st['first_name']} {st['last_name']}".strip()
+
+        if sid in existing_users:
+            created_accounts.append({
+                "student_id": sid,
+                "student_name": full_name,
+                "name_np": st.get('name_np', ''),
+                "class_name": st['class_name'],
+                "section_name": st['section_name'],
+                "roll_no": st['roll_no'],
+                "reg_no": reg,
+                "username": existing_users[sid],
+                "default_password": "(Existing Account - Password Preserved)",
+                "created": False
+            })
+        else:
+            username = reg
+            cur.execute("""
+            INSERT OR IGNORE INTO users (username, password_hash, salt, full_name, role, linked_student_id, status)
+            VALUES (?, ?, ?, ?, 'student', ?, 'Active');
+            """, (username, pwd_hash, salt, full_name, sid))
+            
+            created_accounts.append({
+                "student_id": sid,
+                "student_name": full_name,
+                "name_np": st.get('name_np', ''),
+                "class_name": st['class_name'],
+                "section_name": st['section_name'],
+                "roll_no": st['roll_no'],
+                "reg_no": reg,
+                "username": username,
+                "default_password": default_password,
+                "created": True
+            })
+
+    conn.commit()
+    conn.close()
+    new_count = sum(1 for a in created_accounts if a['created'])
+    return {
+        "success": True,
+        "total_students": len(created_accounts),
+        "newly_created": new_count,
+        "existing": len(created_accounts) - new_count,
+        "accounts": created_accounts
+    }
+
 # ============================================================================
 # Nepal CDC Grading Engine (Letter Grading Directive 2078/2080)
 # ============================================================================

@@ -226,6 +226,7 @@ function applyRolePermissionsUI(role) {
     staff: document.querySelector('.sidebar-item[data-view="staff"]'),
     notices: document.querySelector('.sidebar-item[data-view="notices"]'),
     inquiries: document.querySelector('.sidebar-item[data-view="inquiries"]'),
+    users: document.querySelector('.sidebar-item[data-view="users"]'),
     studentportal: document.querySelector('.sidebar-item[data-view="studentportal"]')
   };
 
@@ -237,15 +238,17 @@ function applyRolePermissionsUI(role) {
   } else if (role === 'teacher') {
     if (menuItems.finance) menuItems.finance.style.display = 'none';
     if (menuItems.staff) menuItems.staff.style.display = 'none';
+    if (menuItems.users) menuItems.users.style.display = 'none';
     if (menuItems.studentportal) menuItems.studentportal.style.display = 'none';
   } else if (role === 'accountant') {
     if (menuItems.exam) menuItems.exam.style.display = 'none';
     if (menuItems.attendance) menuItems.attendance.style.display = 'none';
     if (menuItems.inquiries) menuItems.inquiries.style.display = 'none';
+    if (menuItems.users) menuItems.users.style.display = 'none';
     if (menuItems.studentportal) menuItems.studentportal.style.display = 'none';
   } else if (role === 'student') {
     // For student, hide administrative tools, show Student Portal
-    ['dashboard', 'students', 'exam', 'finance', 'attendance', 'staff', 'inquiries'].forEach(k => {
+    ['dashboard', 'students', 'exam', 'finance', 'attendance', 'staff', 'inquiries', 'users'].forEach(k => {
       if (menuItems[k]) menuItems[k].style.display = 'none';
     });
     if (menuItems.studentportal) menuItems.studentportal.style.display = 'flex';
@@ -305,6 +308,7 @@ function switchView(viewName, subParam = null) {
     if (viewName === 'attendance') loadAttendanceView();
     if (viewName === 'notices') loadNoticesEMS();
     if (viewName === 'inquiries') loadInquiriesEMS();
+    if (viewName === 'users') loadUsersManagementView();
     if (viewName === 'studentportal') loadStudentPortalView();
   }
 }
@@ -750,5 +754,384 @@ async function handleChangePasswordSubmit(e) {
       btn.textContent = originalText;
     }
   }
+}
+
+// ============================================================================
+// User Accounts & Access Management Module (Admin)
+// ============================================================================
+let allUsersList = [];
+
+async function loadUsersManagementView() {
+  const tbody = document.getElementById('ems-users-tbody');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 2rem;">Loading user directory...</td></tr>';
+  }
+
+  try {
+    const res = await apiFetch('/api/users');
+    const users = await res.json();
+    allUsersList = users;
+
+    // Update KPI counters
+    const kpiTotal = document.getElementById('users-kpi-total');
+    const kpiTeachers = document.getElementById('users-kpi-teachers');
+    const kpiStudents = document.getElementById('users-kpi-students');
+    const kpiStaff = document.getElementById('users-kpi-staff');
+
+    if (kpiTotal) kpiTotal.textContent = users.length;
+    if (kpiTeachers) kpiTeachers.textContent = users.filter(u => u.role === 'teacher').length;
+    if (kpiStudents) kpiStudents.textContent = users.filter(u => u.role === 'student').length;
+    if (kpiStaff) kpiStaff.textContent = users.filter(u => u.role === 'admin' || u.role === 'accountant').length;
+
+    // Populate bulk modal class select
+    const bulkClassSel = document.getElementById('bulk-accounts-class-select');
+    if (bulkClassSel && State.classes) {
+      const cur = bulkClassSel.value;
+      bulkClassSel.innerHTML = '<option value="">-- All Active Classes (ECD to Class 12) --</option>' +
+        State.classes.map(c => `<option value="${c.id}">${c.name} (${c.level})</option>`).join('');
+      bulkClassSel.value = cur;
+    }
+
+    filterUsersTable();
+  } catch (err) {
+    console.error('Error loading users:', err);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load user accounts.</td></tr>';
+  }
+}
+
+function filterUsersTable() {
+  const tbody = document.getElementById('ems-users-tbody');
+  if (!tbody) return;
+
+  const searchInput = document.getElementById('users-search-input');
+  const roleFilter = document.getElementById('users-filter-role');
+  const statusFilter = document.getElementById('users-filter-status');
+
+  const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+  const role = roleFilter ? roleFilter.value : 'All';
+  const status = statusFilter ? statusFilter.value : 'All';
+
+  let filtered = allUsersList.filter(u => {
+    const matchRole = role === 'All' || u.role === role;
+    const matchStatus = status === 'All' || u.status === status;
+    const matchSearch = !q ||
+      u.username.toLowerCase().includes(q) ||
+      u.full_name.toLowerCase().includes(q) ||
+      (u.student_reg_no && u.student_reg_no.toLowerCase().includes(q));
+    return matchRole && matchStatus && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 2rem; color: #64748b;">No accounts found matching your filter criteria.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    let roleBadge = 'badge-info';
+    let icon = '👨‍🏫';
+    if (u.role === 'admin') { roleBadge = 'badge-danger'; icon = '👑'; }
+    else if (u.role === 'teacher') { roleBadge = 'badge-info'; icon = '👨‍🏫'; }
+    else if (u.role === 'accountant') { roleBadge = 'badge-warning'; icon = '💳'; }
+    else if (u.role === 'student') { roleBadge = 'badge-success'; icon = '🎓'; }
+
+    let linkedInfo = '<span style="color: #94a3b8;">System Account</span>';
+    if (u.role === 'student' && u.student_reg_no) {
+      linkedInfo = `<span style="font-weight: 600; color: #0f172a;">${u.student_class_name || ''} (${u.student_section_name || ''})</span> • Roll: ${u.student_roll_no || ''}<br><small style="color: #64748b;">Reg: ${u.student_reg_no}</small>`;
+    } else if (u.staff_emp_code) {
+      linkedInfo = `<span style="font-weight: 600; color: #0f172a;">${u.staff_department || 'Academics'}</span><br><small style="color: #64748b;">Code: ${u.staff_emp_code}</small>`;
+    }
+
+    const createdDate = u.created_at ? u.created_at.split(' ')[0] : '-';
+
+    return `
+      <tr>
+        <td style="font-size: 1.25rem; text-align: center;">${icon}</td>
+        <td>
+          <div style="font-weight: 700; color: #1e3a8a; font-family: monospace; font-size: 0.92rem;">${u.username}</div>
+        </td>
+        <td><strong>${u.full_name}</strong></td>
+        <td><span class="badge ${roleBadge}">${u.role.toUpperCase()}</span></td>
+        <td style="font-size: 0.85rem;">${linkedInfo}</td>
+        <td>
+          <span class="badge ${u.status === 'Active' ? 'badge-success' : 'badge-neutral'}">${u.status}</span>
+        </td>
+        <td style="font-size: 0.8rem; color: #64748b;">${createdDate}</td>
+        <td style="text-align: right;">
+          <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+            <button class="btn btn-secondary btn-sm" onclick="openAdminResetPasswordModal(${u.id}, '${u.username}', '${u.full_name.replace(/'/g, "\\'")}')" title="Reset Password" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
+              🔑 Reset
+            </button>
+            <button class="btn ${u.status === 'Active' ? 'btn-outline' : 'btn-primary'} btn-sm" onclick="handleToggleUserStatus(${u.id}, '${u.status}')" title="${u.status === 'Active' ? 'Deactivate' : 'Activate'}" style="padding: 0.25rem 0.55rem; font-size: 0.78rem;">
+              ${u.status === 'Active' ? '🚫 Deactivate' : '✓ Activate'}
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function handleUserRoleChange() {
+  const role = document.getElementById('new-user-role-select').value;
+  const linkStudent = document.getElementById('link-student-group');
+  const linkStaff = document.getElementById('link-staff-group');
+  const hint = document.getElementById('new-user-username-hint');
+  const userInp = document.getElementById('new-user-username');
+
+  if (role === 'student') {
+    if (linkStudent) linkStudent.style.display = 'block';
+    if (linkStaff) linkStaff.style.display = 'none';
+    if (hint) hint.textContent = 'For students: Recommended to use Registration No (e.g. SSS-2081-1001).';
+    if (userInp) userInp.placeholder = 'e.g. SSS-2081-1001';
+  } else if (role === 'teacher') {
+    if (linkStudent) linkStudent.style.display = 'none';
+    if (linkStaff) linkStaff.style.display = 'block';
+    if (hint) hint.textContent = 'For teachers: Recommended to use name-based (e.g. janak.bhattarai) or emp code.';
+    if (userInp) userInp.placeholder = 'e.g. janak.bhattarai';
+  } else {
+    if (linkStudent) linkStudent.style.display = 'none';
+    if (linkStaff) linkStaff.style.display = 'none';
+    if (hint) hint.textContent = 'Enter a unique login ID for this staff member.';
+    if (userInp) userInp.placeholder = 'e.g. accountant2';
+  }
+}
+
+async function openCreateUserModal() {
+  const form = document.getElementById('create-user-form');
+  if (form) form.reset();
+
+  const roleSelect = document.getElementById('new-user-role-select');
+  if (roleSelect) roleSelect.value = 'teacher';
+  handleUserRoleChange();
+
+  // Populate staff dropdown
+  try {
+    const resStaff = await apiFetch('/api/staff');
+    const staffList = await resStaff.json();
+    const stSel = document.getElementById('new-user-staff-select');
+    if (stSel) {
+      stSel.innerHTML = '<option value="">-- No specific staff linked --</option>' +
+        staffList.map(s => `<option value="${s.id}">${s.name_en} (${s.role} - ${s.department})</option>`).join('');
+    }
+  } catch (e) {}
+
+  // Populate student dropdown
+  try {
+    const resStudents = await apiFetch('/api/students');
+    const stList = await resStudents.json();
+    const sSel = document.getElementById('new-user-student-select');
+    if (sSel) {
+      sSel.innerHTML = '<option value="">-- No specific student linked --</option>' +
+        stList.map(st => `<option value="${st.id}" data-reg="${st.reg_no}" data-name="${st.first_name} ${st.last_name}">${st.first_name} ${st.last_name} (${st.class_name} • Reg: ${st.reg_no})</option>`).join('');
+      sSel.onchange = () => {
+        const opt = sSel.selectedOptions[0];
+        if (opt && opt.dataset.reg) {
+          const uInput = document.getElementById('new-user-username');
+          const fnInput = document.getElementById('new-user-fullname');
+          if (uInput && !uInput.value) uInput.value = opt.dataset.reg;
+          if (fnInput && !fnInput.value) fnInput.value = opt.dataset.name;
+        }
+      };
+    }
+  } catch (e) {}
+
+  openModal('create-user-modal');
+}
+
+async function handleCreateUserSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const role = form.role.value;
+  const full_name = form.full_name.value.trim();
+  const username = form.username.value.trim();
+  const password = form.password.value.trim();
+  const linked_student_id = form.linked_student_id ? (form.linked_student_id.value || null) : null;
+  const linked_staff_id = form.linked_staff_id ? (form.linked_staff_id.value || null) : null;
+
+  const btn = document.getElementById('save-user-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating...'; }
+
+  try {
+    const res = await apiFetch('/api/users', {
+      method: 'POST',
+      body: {
+        role,
+        full_name,
+        username,
+        password,
+        linked_student_id: linked_student_id ? parseInt(linked_student_id) : null,
+        linked_staff_id: linked_staff_id ? parseInt(linked_staff_id) : null
+      }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'User account created successfully!', 'success');
+      closeModal('create-user-modal');
+      loadUsersManagementView();
+    } else {
+      showToast(data.error || 'Failed to create user account.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error creating user.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Create User Account'; }
+  }
+}
+
+function openAdminResetPasswordModal(userId, username, fullName) {
+  const idInp = document.getElementById('admin-reset-user-id');
+  const targetTxt = document.getElementById('admin-reset-user-target');
+  const pwdInp = document.getElementById('admin-reset-new-password');
+
+  if (idInp) idInp.value = userId;
+  if (targetTxt) targetTxt.textContent = `User: ${fullName} (${username})`;
+  if (pwdInp) pwdInp.value = 'sagarmatha@2081';
+
+  openModal('admin-reset-password-modal');
+}
+
+async function handleAdminResetPasswordSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const userId = form.user_id.value;
+  const new_password = form.new_password.value.trim();
+
+  const btn = document.getElementById('admin-reset-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Resetting...'; }
+
+  try {
+    const res = await apiFetch(`/api/users/${userId}/reset-password`, {
+      method: 'PUT',
+      body: { new_password }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'Password reset successfully!', 'success');
+      closeModal('admin-reset-password-modal');
+    } else {
+      showToast(data.error || 'Failed to reset password.', 'error');
+    }
+  } catch (err) {
+    showToast('Error resetting password.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Reset Password Now'; }
+  }
+}
+
+async function handleToggleUserStatus(userId, currentStatus) {
+  const targetStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+  if (!confirm(`Are you sure you want to change this user status to ${targetStatus}?`)) return;
+
+  try {
+    const res = await apiFetch(`/api/users/${userId}/status`, {
+      method: 'PUT',
+      body: { status: targetStatus }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'Status updated!', 'success');
+      loadUsersManagementView();
+    } else {
+      showToast(data.error || 'Failed to update status.', 'error');
+    }
+  } catch (err) {
+    showToast('Error updating status.', 'error');
+  }
+}
+
+async function handleBulkStudentAccountsSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const class_id = form.class_id.value;
+  const default_password = form.default_password.value.trim();
+
+  const btn = document.getElementById('bulk-generate-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+
+  try {
+    const res = await apiFetch('/api/students/generate-accounts', {
+      method: 'POST',
+      body: {
+        class_id: class_id ? parseInt(class_id) : null,
+        default_password
+      }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Generated ${data.newly_created} new accounts (${data.existing} existing preserved).`, 'success');
+      closeModal('bulk-student-accounts-modal');
+      renderPrintableLoginSlips(data);
+      loadUsersManagementView();
+    } else {
+      showToast(data.error || 'Failed to generate accounts.', 'error');
+    }
+  } catch (err) {
+    showToast('Error generating student accounts.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Generate & View Login Slips'; }
+  }
+}
+
+function renderPrintableLoginSlips(data) {
+  const container = document.getElementById('printable-slips-container');
+  const summary = document.getElementById('printable-slips-summary');
+  if (!container) return;
+
+  const accounts = data.accounts || [];
+  if (summary) {
+    summary.textContent = `Generated ${accounts.length} total slips (${data.newly_created || 0} newly created). Ready to print on A4.`;
+  }
+
+  container.innerHTML = `
+    <div class="slips-grid">
+      ${accounts.map(a => `
+        <div class="login-slip-card">
+          <div class="login-slip-header">
+            <div class="slip-emblem">स</div>
+            <div>
+              <div class="slip-school-name">श्री सगरमाथा माध्यमिक विद्यालय</div>
+              <div class="slip-school-sub">Shree Sagarmatha Secondary School • Bhadrapur 2, Jhapa</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span class="slip-tag">🎓 Student & Parent Portal Login Slip</span>
+            <span style="font-size: 0.72rem; color: #64748b;">Year: 2081/82</span>
+          </div>
+
+          <div style="font-weight: 800; font-size: 1.05rem; color: #1e3a8a; margin-bottom: 2px;">
+            ${a.student_name}
+          </div>
+          ${a.name_np ? `<div style="font-size: 0.8rem; color: #0f766e; margin-bottom: 6px;">${a.name_np}</div>` : ''}
+
+          <div style="display: flex; gap: 0.5rem; font-size: 0.82rem; margin-bottom: 8px;">
+            <span class="badge badge-info">${a.class_name} (${a.section_name})</span>
+            <span class="badge badge-neutral">Roll: ${a.roll_no}</span>
+          </div>
+
+          <div class="slip-credentials">
+            <div class="slip-row">
+              <span class="slip-label">Portal URL:</span>
+              <span class="slip-val" style="color: #0f766e; font-size: 0.8rem;">sagarmatha-ems.onrender.com</span>
+            </div>
+            <div class="slip-row">
+              <span class="slip-label">Login ID (Username):</span>
+              <span class="slip-val" style="color: #1e3a8a; font-family: monospace; font-size: 0.95rem;">${a.username}</span>
+            </div>
+            <div class="slip-row">
+              <span class="slip-label">Password:</span>
+              <span class="slip-val" style="font-family: monospace; font-size: 0.92rem; color: #b91c1c;">${a.default_password}</span>
+            </div>
+          </div>
+
+          <div class="slip-instructions">
+            📌 Visit the school website, click <strong>"Sagarmatha EMS Login"</strong>, enter your Registration Number and password. Please change your password on first login.
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  openModal('printable-slips-modal');
 }
 
