@@ -11,12 +11,13 @@ def seed_database(force=False):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Safety check: do not overwrite existing database in production unless forced
+    # Safety check: do not overwrite existing curriculum in production unless forced
     try:
-        cur.execute("SELECT COUNT(*) as count FROM users;")
+        cur.execute("SELECT COUNT(*) as count FROM subjects;")
         row = cur.fetchone()
-        if row and row['count'] > 0 and not force and os.environ.get("FORCE_SEED") != "1":
-            print("Database already contains data. Skipping re-seed to protect live records. (Set FORCE_SEED=1 to reset)")
+        count = row['count'] if isinstance(row, dict) else (row[0] if row else 0)
+        if count > 0 and not force and os.environ.get("FORCE_SEED") != "1":
+            print("Database already contains curriculum and subjects. Skipping re-seed to protect live records.")
             conn.close()
             return
     except Exception:
@@ -596,23 +597,20 @@ def seed_database(force=False):
     VALUES (?, ?, ?, ?);
     """, att_samples)
 
-    # 15. User Accounts for Multi-Tier RBAC
+    # 15. User Accounts for Multi-Tier RBAC (Preserve existing passwords)
     from database import hash_password
-    cur.execute("DELETE FROM users;")
-    cur.execute("DELETE FROM sessions;")
-
     users_seed = [
         ('admin', 'admin123', 'Ram Prasad Adhikari (Principal)', 'admin', None, 1),
         ('teacher', 'teacher123', 'Dr. Janak Raj Bhattarai (Exam Coordinator)', 'teacher', None, 3),
         ('accountant', 'account123', 'Manoj Kumar Shrestha (Senior Bursar)', 'accountant', None, 4),
-        ('student10', 'student123', 'Aayush Adhikari (Student Class 10)', 'student', student_map['SSS-2081-1001'], None),
-        ('student_ng', 'student123', 'Pooja Dahal (Student Class 10)', 'student', student_map['SSS-2081-1006'], None),
+        ('student10', 'student123', 'Aayush Adhikari (Student Class 10)', 'student', student_map.get('SSS-2081-1001'), None),
+        ('student_ng', 'student123', 'Pooja Dahal (Student Class 10)', 'student', student_map.get('SSS-2081-1006'), None),
     ]
 
     for uname, pwd, fname, role, st_id, staff_id in users_seed:
         pwd_hash, salt = hash_password(pwd)
         cur.execute("""
-        INSERT INTO users (username, password_hash, salt, full_name, role, linked_student_id, linked_staff_id, status)
+        INSERT OR IGNORE INTO users (username, password_hash, salt, full_name, role, linked_student_id, linked_staff_id, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, 'Active');
         """, (uname, pwd_hash, salt, fname, role, st_id, staff_id))
 

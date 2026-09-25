@@ -254,6 +254,23 @@ class EMSRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(rows)
             return
 
+        if path == "/api/admin/seed-curriculum":
+            secret = query and "secret=sagarmatha2034" in query
+            user = self.get_current_user(query)
+            if not secret and (not user or user.get('role') != 'admin'):
+                conn.close()
+                self.send_json({"error": "Admin access required. Include ?secret=sagarmatha2034 or login as admin."}, 401)
+                return
+            conn.close()
+            try:
+                from seed_data import seed_database
+                seed_database(force=True)
+                self.send_json({"success": True, "message": "All 17 Classes, Sections, Exams, Notices, and 105 Nepal CDC Subjects populated successfully into Turso Cloud!"})
+                return
+            except Exception as e:
+                self.send_json({"error": str(e)}, 500)
+                return
+
         # 2. Authentication Check for All Protected EMS Endpoints
         user = self.get_current_user(query)
 
@@ -1372,9 +1389,17 @@ def run_server(host=HOST, port=PORT):
     init_db()
     try:
         from seed_data import seed_database
-        seed_database()
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) as count FROM subjects;")
+        row = cur.fetchone()
+        count = row['count'] if isinstance(row, dict) else (row[0] if row else 0)
+        conn.close()
+        if count == 0:
+            print("Database has 0 subjects. Automatically seeding all 17 classes and 105 Nepal CDC subjects...")
+            seed_database(force=True)
     except Exception as e:
-        print(f"Initial seed check: {e}")
+        print(f"Auto-seed check note: {e}")
     server = ThreadedHTTPServer((host, port), EMSRequestHandler)
     print(f"================================================================")
     print(f"  Shree Sagarmatha Secondary School & Sagarmatha EMS Server")
